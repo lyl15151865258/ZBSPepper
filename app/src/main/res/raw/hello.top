@@ -1,0 +1,6 @@
+topic: ~hello()
+# Defining extra concepts out of words or group of words
+concept:(hello) [你叫什么名字 你叫什么]
+
+# Replying to speech
+u:(~hello) ~我叫二代子
