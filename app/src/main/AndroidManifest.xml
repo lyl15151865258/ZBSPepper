@@ -7,16 +7,24 @@
 
     <!-- 设置网络等权限 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--如需使用人脸识别，还要添加：摄相头权限，拍照需要用到 -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!--获取手机录音机使用权限，听写、识别、语义理解需要用到此权限 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--连接网络权限，用于执行云端语音能力 -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--读取网络信息状态 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!--获取当前wifi状态 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!--允许程序改变网络连接状态 -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <!--读取手机信息权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <!--外存储写权限，构建语法需要用到此权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!--外存储读权限，构建语法需要用到此权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- 前台Service权限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -83,6 +91,48 @@
         <!-- 主页面 -->
         <activity
             android:name=".activity.MainActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
+        <!-- 自我介绍页面 -->
+        <activity
+            android:name=".activity.SelfIntroductionActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
+        <!-- 公司简介页面 -->
+        <activity
+            android:name=".activity.CompanyProfileActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
+        <!-- 经营范围页面 -->
+        <activity
+            android:name=".activity.BusinessScopeActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
+        <!-- 工程案例页面 -->
+        <activity
+            android:name=".activity.EngineeringCaseActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
+        <!-- 留言板页面 -->
+        <activity
+            android:name=".activity.MessageBoardActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
+        <!-- 年会专栏页面 -->
+        <activity
+            android:name=".activity.AnnualMeetingActivity"
             android:configChanges="locale"
             android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape" />

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_50"
+    android:background="@color/blue"
+    android:gravity="center"
+    android:paddingStart="@dimen/dp_5"
+    android:paddingEnd="@dimen/dp_5">
+
+    <FrameLayout
+        android:id="@+id/toolbarLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="@dimen/dp_36">
+
+        <ImageView
+            android:id="@+id/iv_left"
+            android:layout_width="@dimen/dp_36"
+            android:layout_height="@dimen/dp_36"
+            android:contentDescription="@null"
+            android:padding="@dimen/dp_6"
+            android:visibility="gone" />
+
+        <com.zhongbenshuo.zbspepper.widget.textview.MyTextView
+            android:id="@+id/tv_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dp_6"
+            android:singleLine="true"
+            android:text="完成（5）"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_18"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <com.zhongbenshuo.zbspepper.widget.textview.MarqueeTextView
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:fontFamily="@font/youyuan"
+        android:text="中本硕机电欢迎您"
+        android:textSize="@dimen/sp_28" />
+
+    <FrameLayout
+        android:id="@+id/toolbarRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="@dimen/dp_36">
+
+        <ImageView
+            android:id="@+id/iv_right"
+            android:layout_width="@dimen/dp_36"
+            android:layout_height="@dimen/dp_36"
+            android:contentDescription="@null"
+            android:padding="@dimen/dp_6"
+            android:visibility="gone" />
+
+        <com.zhongbenshuo.zbspepper.widget.textview.MyTextView
+            android:id="@+id/tv_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dp_6"
+            android:singleLine="true"
+            android:text="完成（5）"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_18"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</LinearLayout>

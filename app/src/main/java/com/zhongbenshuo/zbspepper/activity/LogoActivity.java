@@ -52,7 +52,7 @@ public class LogoActivity extends BaseActivity {
      * 获取服务器的RSA公钥（不需要加解密）
      */
     private void getRSAPublicKey() {
-        Observable<Result> observable = NetClient.getInstance(NetClient.getBaseUrlProject(), false, false).getZbsApi().getRSAPublicKey();
+        Observable<Result> observable = NetClient.getInstance(NetClient.getBaseUrlProject(), false).getZbsApi().getRSAPublicKey();
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new NetworkObserver<Result>(this) {
 
             @Override

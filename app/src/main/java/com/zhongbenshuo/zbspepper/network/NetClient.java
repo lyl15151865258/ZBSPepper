@@ -21,10 +21,27 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
@@ -60,34 +77,7 @@ public class NetClient {
     private static String defaultUrl = "";
     private static final String CACHE_NAME = "NetCache";
 
-    /**
-     * 主账号基础Url带项目名
-     */
-    public static final String BASE_URL_PROJECT = getBaseUrl(NetWork.SERVER_HOST_MAIN, NetWork.SERVER_PORT_MAIN, NetWork.PROJECT_MAIN);
-
-    /**
-     * 主账号基础Url不带项目名（用于图像链接中）
-     */
-    public static final String BASE_URL = "http://" + NetWork.SERVER_HOST_MAIN + ":" + NetWork.SERVER_PORT_MAIN + "/";
-
-    /**
-     * 高德天气基础Url
-     */
-    public static final String BASE_URL_WEATHER = "https://restapi.amap.com/v3/";
-
-    /**
-     * 拼接通用基础Url
-     *
-     * @param serverHost  IP地址（域名）
-     * @param httpPort    端口号
-     * @param serviceName 项目名
-     * @return 拼接后的Url
-     */
-    public static String getBaseUrl(String serverHost, String httpPort, String serviceName) {
-        return "http://" + serverHost + ":" + httpPort + "/" + serviceName + "/";
-    }
-
-    private NetClient(String baseUrl, boolean needCache, boolean encrypt) {
+    private NetClient(String baseUrl, boolean encrypt) {
 
         // log用拦截器
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -99,7 +89,7 @@ public class NetClient {
         } else {
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         }
-        LogUtils.d(TAG, "Application为空吗：" + (ZBSPepperApplication.getInstance() == null));
+
         //设置缓存目录
         File cacheFile = new File(ZBSPepperApplication.getInstance().getExternalCacheDir(), CACHE_NAME);
         //生成缓存，50M
@@ -138,59 +128,46 @@ public class NetClient {
             return response;
         };
 
+        // OkHttpClient对象
+        OkHttpClient okHttpClient;
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+//        try {
+//            //添加SSL证书验证
+//            builder.sslSocketFactory(getSSLSocketFactory(), new MyX509TrustManager());
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        } catch (KeyManagementException e) {
+//            e.printStackTrace();
+//        }
+
         // 根据是否需要加密确定是否加入DataEncryptInterceptor拦截器
         if (encrypt) {
             LogUtils.d(TAG, "走加密的请求");
-            if (needCache) {
-                okHttpClient = new OkHttpClient.Builder()
-                        .addInterceptor(loggingInterceptor)
-                        .addInterceptor(cacheInterceptor)
-                        .addInterceptor(dataEncryptInterceptor)
-                        .cache(cache)
-                        //设置超时时间
-                        .connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        //错误重连
-                        .retryOnConnectionFailure(true)
-                        .build();
-            } else {
-                okHttpClient = new OkHttpClient.Builder()
-                        .addInterceptor(loggingInterceptor)
-                        .addInterceptor(dataEncryptInterceptor)
-                        //设置超时时间
-                        .connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        //错误重连
-                        .retryOnConnectionFailure(true)
-                        .build();
-            }
+            okHttpClient = builder
+                    .addInterceptor(loggingInterceptor)
+                    .addInterceptor(cacheInterceptor)
+                    .addInterceptor(dataEncryptInterceptor)
+                    .cache(cache)
+                    //设置超时时间
+                    .connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
+                    .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
+                    .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
+                    //错误重连
+                    .retryOnConnectionFailure(true)
+                    .build();
         } else {
             LogUtils.d(TAG, "走不加密的请求");
-            if (needCache) {
-                okHttpClient = new OkHttpClient.Builder()
-                        .addInterceptor(loggingInterceptor)
-                        .addInterceptor(cacheInterceptor)
-                        .cache(cache)
-                        //设置超时时间
-                        .connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        //错误重连
-                        .retryOnConnectionFailure(true)
-                        .build();
-            } else {
-                okHttpClient = new OkHttpClient.Builder()
-                        .addInterceptor(loggingInterceptor)
-                        //设置超时时间
-                        .connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
-                        //错误重连
-                        .retryOnConnectionFailure(true)
-                        .build();
-            }
+            okHttpClient = builder
+                    .addInterceptor(loggingInterceptor)
+                    .addInterceptor(cacheInterceptor)
+                    .cache(cache)
+                    //设置超时时间
+                    .connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
+                    .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
+                    .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.SECONDS)
+                    //错误重连
+                    .retryOnConnectionFailure(true)
+                    .build();
         }
 
         //设置Gson的非严格模式
@@ -204,6 +181,85 @@ public class NetClient {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
+    }
+
+    private SSLSocketFactory getSSLSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {
+        SSLContext context = SSLContext.getInstance("TLS");
+        TrustManager[] trustManagers = {new MyX509TrustManager()};
+        context.init(null, trustManagers, new SecureRandom());
+        return context.getSocketFactory();
+    }
+
+    private class MyX509TrustManager implements X509TrustManager {
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            if (chain == null) {
+                throw new CertificateException("checkServerTrusted: X509Certificate array is null");
+            }
+            if (chain.length < 1) {
+                throw new CertificateException("checkServerTrusted: X509Certificate is empty");
+            }
+            if (!(null != authType && authType.equals("ECDHE_RSA"))) {
+                throw new CertificateException("checkServerTrusted: AuthType is not ECDHE_RSA");
+            }
+
+            //检查所有证书
+            try {
+                TrustManagerFactory factory = TrustManagerFactory.getInstance("X509");
+                factory.init((KeyStore) null);
+                for (TrustManager trustManager : factory.getTrustManagers()) {
+                    ((X509TrustManager) trustManager).checkServerTrusted(chain, authType);
+                }
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            }
+
+            //获取本地证书中的信息
+            String clientEncoded = "";
+            String clientSubject = "";
+            String clientIssUser = "";
+            try {
+                CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+                InputStream inputStream = ZBSPepperApplication.getInstance().getAssets().open("zbs.cer");
+                X509Certificate clientCertificate = (X509Certificate) certificateFactory.generateCertificate(inputStream);
+                clientEncoded = new BigInteger(1, clientCertificate.getPublicKey().getEncoded()).toString(16);
+                clientSubject = clientCertificate.getSubjectDN().getName();
+                clientIssUser = clientCertificate.getIssuerDN().getName();
+                LogUtils.d(TAG, "证书详情：clientEncoded：" + clientEncoded + "，clientSubject" + clientSubject + "，clientIssUser" + clientIssUser);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //获取网络中的证书信息
+            X509Certificate certificate = chain[0];
+            PublicKey publicKey = certificate.getPublicKey();
+            String serverEncoded = new BigInteger(1, publicKey.getEncoded()).toString(16);
+
+            if (!clientEncoded.equals(serverEncoded)) {
+                throw new CertificateException("server's PublicKey is not equals to client's PublicKey");
+            }
+            String subject = certificate.getSubjectDN().getName();
+            if (!clientSubject.equals(subject)) {
+                throw new CertificateException("server's subject is not equals to client's subject");
+            }
+            String issuser = certificate.getIssuerDN().getName();
+            if (!clientIssUser.equals(issuser)) {
+                throw new CertificateException("server's issuser is not equals to client's issuser");
+            }
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
     }
 
     public class NullOnEmptyConverterFactory extends Converter.Factory {
@@ -372,25 +428,24 @@ public class NetClient {
     /**
      * 获取单例的NetClient对象
      *
-     * @param baseUrl   基础Url
-     * @param needCache 是否需要缓存
-     * @param encrypt   是否需要加密
+     * @param baseUrl 基础Url
+     * @param encrypt 是否需要加密
      * @return NetClient对象
      */
-    public static synchronized NetClient getInstance(String baseUrl, boolean needCache, boolean encrypt) {
+    public static synchronized NetClient getInstance(String baseUrl, boolean encrypt) {
         if (encrypt) {
             if (mEncryptNetClient == null || !defaultUrl.equals(baseUrl)) {
-                mEncryptNetClient = new NetClient(baseUrl, needCache, true);
+                mEncryptNetClient = new NetClient(baseUrl, true);
                 defaultUrl = baseUrl;
             }
             LogUtils.d(TAG, "请求接口：" + baseUrl);
             return mEncryptNetClient;
         } else {
             if (mNetClient == null || !defaultUrl.equals(baseUrl)) {
-                mNetClient = new NetClient(baseUrl, needCache, false);
+                mNetClient = new NetClient(baseUrl, false);
                 defaultUrl = baseUrl;
             }
-            LogUtils.d(TAG, "请求接口：" + baseUrl);
+            LogUtils.d(TAG, "BaseUrl" + baseUrl);
             return mNetClient;
         }
     }
@@ -402,6 +457,9 @@ public class NetClient {
         return zbsApi;
     }
 
+    /**
+     * 主账号基础Url不带项目名（用于图像链接中）
+     */
     public static String getBaseUrl() {
         // 计算主服务器的URL路径
         String ip = SPHelper.getString("PrimaryServerIp", "");
@@ -412,9 +470,12 @@ public class NetClient {
         if (TextUtils.isEmpty(port)) {
             port = NetWork.SERVER_PORT_MAIN;
         }
-        return "http://" + ip + ":" + port + "/";
+        return ip + ":" + port + "/";
     }
 
+    /**
+     * 主账号基础Url带项目名
+     */
     public static String getBaseUrlProject() {
         // 计算主服务器的URL路径
         String ip = SPHelper.getString("PrimaryServerIp", "");
@@ -425,11 +486,7 @@ public class NetClient {
         if (TextUtils.isEmpty(port)) {
             port = NetWork.SERVER_PORT_MAIN;
         }
-        return "http://" + ip + ":" + port + "/" + NetWork.PROJECT_MAIN + "/";
+        return ip + ":" + port + "/" + NetWork.PROJECT_MAIN + "/";
     }
-
-    private static OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.MILLISECONDS)
-            .readTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.MILLISECONDS)
-            .writeTimeout(NetWork.TIME_OUT_HTTP, TimeUnit.MILLISECONDS).build();
 
 }
