@@ -180,6 +180,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                 }
                                 answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
                                 SPHelper.save("NlpAnswer", answer);
+                                LogUtils.d(TAG, "讯飞AIUI回复：" + answer);
                             }
                         }
 
