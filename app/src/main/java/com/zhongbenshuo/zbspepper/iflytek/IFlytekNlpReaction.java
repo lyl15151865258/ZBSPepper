@@ -35,7 +35,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
     private String question;
     private String answer;
     // TTS是否开启需要在讯飞AIUI云端同步配置。
-    private boolean useIFlytekTTS = true;
+    private boolean useIFlytekTTS = false;
     private SpeechEngine mSpeechEngine;
     private Handler mHandler;
 
