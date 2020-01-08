@@ -137,6 +137,13 @@
             android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape" />
 
+        <!-- 对话页面 -->
+        <activity
+            android:name=".activity.ChatActivity"
+            android:configChanges="locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape" />
+
         <!-- 下载文件时在状态栏显示进度的服务 -->
         <service
             android:name=".service.DownloadService"

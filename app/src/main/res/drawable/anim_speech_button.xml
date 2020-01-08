@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+                android:oneshot="false">
+    <item
+        android:drawable="@drawable/gif_voice_line01"
+        android:duration="120"/>
+    <item
+        android:drawable="@drawable/gif_voice_line02"
+        android:duration="120"/>
+    <item
+        android:drawable="@drawable/gif_voice_line03"
+        android:duration="120"/>
+    <item
+        android:drawable="@drawable/gif_voice_line03"
+        android:duration="120"/>
+    <item
+        android:drawable="@drawable/gif_voice_line02"
+        android:duration="120"/>
+    <item
+        android:drawable="@drawable/gif_voice_line01"
+        android:duration="120"/>
+</animation-list>

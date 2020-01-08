@@ -1,7 +1,6 @@
 package com.zhongbenshuo.zbspepper.iflytek;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 
 import com.aldebaran.qi.Future;
@@ -22,11 +21,10 @@ import com.zhongbenshuo.zbspepper.utils.LogUtils;
 
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-
 
 public class IFlytekNlpReaction extends BaseChatbotReaction {
     private static String TAG = IFlytekNlpReaction.class.getSimpleName();
@@ -34,10 +32,9 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
     private int mAIUIState = AIUIConstant.STATE_IDLE;
     private String question;
     private String answer;
-    // TTS是否开启需要在讯飞AIUI云端同步配置。
+    // TTS是否开启需要在讯飞AIUI云端同步配置语音合成下发。
     private boolean useIFlytekTTS = false;
     private SpeechEngine mSpeechEngine;
-    private Handler mHandler;
 
     public IFlytekNlpReaction(QiContext context, String question) {
         super(context);
@@ -111,17 +108,13 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         }
 
         Log.i(TAG, "start text nlp");
-        try {
-            String params = "data_type=text,tag=text-tag";
-            byte[] textData = question.getBytes("utf-8");
+        String params = "data_type=text,tag=text-tag";
+        byte[] textData = question.getBytes(StandardCharsets.UTF_8);
 
-            AIUIMessage write = new AIUIMessage(AIUIConstant.CMD_WRITE, 0, 0, params, textData);
-            mAIUIAgent.sendMessage(write);
+        AIUIMessage write = new AIUIMessage(AIUIConstant.CMD_WRITE, 0, 0, params, textData);
+        mAIUIAgent.sendMessage(write);
 
 
-        } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "Error during send nlp message exception " + e.getCause());
-        }
     }
 
     @Override

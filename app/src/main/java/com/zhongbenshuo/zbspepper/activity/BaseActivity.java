@@ -341,7 +341,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (this instanceof LogoActivity || this instanceof MainActivity) {
+            if (this instanceof LogoActivity ) {
                 // RgbRecognizeActivity和IrRecognizeActivity页面不执行退出， 改返回键为Home键，返回手机主界面，不退出APP
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

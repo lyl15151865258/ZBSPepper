@@ -3,4 +3,4 @@ topic: ~hello()
 concept:(hello) [你叫什么名字 你叫什么]
 
 # Replying to speech
-u:(~hello) ~我叫二代子
+u:(~hello) ~我叫王富贵
