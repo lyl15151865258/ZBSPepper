@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:format12Hour="HH:mm:ss"
             android:gravity="end"
-            android:format24Hour="yyyy年MM月dd日  EEEE HH:mm:ss"
+            android:format24Hour="yyyy-MM-dd  EEEE HH:mm:ss"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_24" />
 

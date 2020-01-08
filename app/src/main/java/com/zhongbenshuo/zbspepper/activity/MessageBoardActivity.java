@@ -28,7 +28,7 @@ public class MessageBoardActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_introduction);
+        setContentView(R.layout.activity_message);
         mContext = this;
         MyToolbar toolbar = findViewById(R.id.myToolbar);
         toolbar.initToolBar(R.string.MessageBoard, R.drawable.back_white, -1, -1, -1, onClickListener);
