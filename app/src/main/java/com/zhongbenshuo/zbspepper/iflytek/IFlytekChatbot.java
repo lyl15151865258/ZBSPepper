@@ -15,6 +15,7 @@ import com.zhongbenshuo.zbspepper.common.DirectSayReaction;
 /**
  * 人机对话过程中，讯飞语义理解对pepper听到的文本进行处理，执行语音合成。
  */
+
 public class IFlytekChatbot extends BaseChatbot {
 
     private static final String TAG = "IFlytekChatbot";

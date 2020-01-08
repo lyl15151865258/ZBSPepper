@@ -94,7 +94,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public void insertData(ChatText chatText) {
         list.add(chatText);
-        notifyDataSetChanged();
+        notifyItemInserted(getItemCount() - 1);
         rvChat.scrollToPosition(getItemCount() - 1);
     }
 

@@ -3,11 +3,9 @@ package com.zhongbenshuo.zbspepper.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
-import com.youth.banner.listener.OnBannerListener;
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.constant.BannerResources;
 import com.zhongbenshuo.zbspepper.glide.loader.GlideImageLoader;
@@ -25,7 +23,6 @@ import com.zhongbenshuo.zbspepper.utils.ActivityController;
 public class BusinessScopeActivity extends BaseActivity {
 
     private Context mContext;
-    private ImageView ivClose;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +30,7 @@ public class BusinessScopeActivity extends BaseActivity {
         setContentView(R.layout.activity_company_profile);
         mContext = this;
 
-        ivClose = findViewById(R.id.ivClose);
-        ivClose.setOnClickListener(onClickListener);
+        findViewById(R.id.ivBack).setOnClickListener(onClickListener);
 
         Banner banner = findViewById(R.id.banner);
         banner.setImages(BannerResources.getBusinessScopeResources())
@@ -43,23 +39,11 @@ public class BusinessScopeActivity extends BaseActivity {
                 .setDelayTime(8000)
                 .start();
 
-        banner.setOnBannerListener(onBannerListener);
     }
-
-    private OnBannerListener onBannerListener = new OnBannerListener() {
-        @Override
-        public void OnBannerClick(int position) {
-            if (ivClose.getVisibility() == View.VISIBLE) {
-                ivClose.setVisibility(View.GONE);
-            } else {
-                ivClose.setVisibility(View.VISIBLE);
-            }
-        }
-    };
 
     private View.OnClickListener onClickListener = (v) -> {
         switch (v.getId()){
-            case R.id.ivClose:
+            case R.id.ivBack:
                 ActivityController.finishActivity(this);
                 break;
             default:

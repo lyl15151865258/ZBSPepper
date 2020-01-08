@@ -7,7 +7,6 @@ import android.view.View;
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.iflytek.WakeUpUtil;
 import com.zhongbenshuo.zbspepper.utils.ActivityController;
-import com.zhongbenshuo.zbspepper.widget.MyToolbar;
 
 /**
  * 自我介绍页面
@@ -26,14 +25,13 @@ public class SelfIntroductionActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_introduction);
         mContext = this;
-        MyToolbar toolbar = findViewById(R.id.myToolbar);
-        toolbar.initToolBar(R.string.SelfIntroduction, R.drawable.back_white, -1, -1, -1, onClickListener);
+        findViewById(R.id.ivBack).setOnClickListener(onClickListener);
 
     }
 
     private View.OnClickListener onClickListener = (v) -> {
         switch (v.getId()){
-            case R.id.toolbarLeft:
+            case R.id.ivBack:
                 ActivityController.finishActivity(this);
                 break;
             default:

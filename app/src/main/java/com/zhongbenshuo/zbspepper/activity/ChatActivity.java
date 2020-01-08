@@ -39,7 +39,6 @@ import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
 import com.zhongbenshuo.zbspepper.utils.ActivityController;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
 import com.zhongbenshuo.zbspepper.utils.SpeechAnimUtils;
-import com.zhongbenshuo.zbspepper.widget.MyToolbar;
 import com.zhongbenshuo.zbspepper.widget.WaveView;
 
 import java.util.ArrayList;
@@ -73,8 +72,7 @@ public class ChatActivity extends BaseActivity {
         mContext = this;
         setContentView(R.layout.activity_chat);
 
-        MyToolbar toolbar = findViewById(R.id.myToolbar);
-        toolbar.initToolBar(R.string.ChatPage, R.drawable.back_white, -1, -1, -1, onClickListener);
+        findViewById(R.id.ivBack).setOnClickListener(onClickListener);
 
         wave = findViewById(R.id.wave);
         input = findViewById(R.id.input);
@@ -98,7 +96,7 @@ public class ChatActivity extends BaseActivity {
 
     private View.OnClickListener onClickListener = (v) -> {
         switch (v.getId()) {
-            case R.id.toolbarLeft:
+            case R.id.ivBack:
                 ActivityController.finishActivity(this);
                 break;
             case R.id.input:

@@ -1,7 +1,6 @@
 package com.zhongbenshuo.zbspepper.iflytek;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.aldebaran.qi.Future;
 import com.aldebaran.qi.sdk.QiContext;
@@ -43,14 +42,14 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
     }
 
     public AIUIAgent createAgent(MyAIUIListener mAIUIListener) {
-        Log.i(TAG, "create aiui agent");
+        LogUtils.d(TAG, "create aiui agent");
         try {
             String params = IOUtils.fromAsset(mContext, "cfg/aiui_phone.cfg");
             params = params.replace("\n", "").replace("\t", "").replace(" ", "");
             AIUIAgent aIUIAgent = AIUIAgent.createAgent(mContext, params, mAIUIListener);
             return aIUIAgent;
         } catch (Exception e) {
-            Log.e(TAG, "Error " + e.getMessage());
+            LogUtils.d(TAG, "Error " + e.getMessage());
             return null;
         }
 
@@ -72,7 +71,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
-                Log.e(TAG, "Event during countDownLatch.await() e: " + e);
+                LogUtils.d(TAG, "Event during countDownLatch.await() e: " + e);
             }
             String answers = SPHelper.getString("NlpAnswer", "");
             if (!useIFlytekTTS) {
@@ -86,9 +85,9 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     try {
                         fSay.get();
                     } catch (ExecutionException e) {
-                        Log.e(TAG, "Error during Say", e);
+                        LogUtils.d(TAG, "Error during Say" + e.getMessage());
                     } catch (CancellationException e) {
-                        Log.i(TAG, "Interruption during Say" + e);
+                        LogUtils.d(TAG, "Interruption during Say" + e);
                     }
                 } else {
                     doFallback();
@@ -96,7 +95,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
             }
             aiuiAgent.destroy();
             SPHelper.save("NlpAnswer", "");
-            Log.i(TAG, "aiuiAgent destroy");
+            LogUtils.d(TAG, "aiuiAgent destroy");
             answer = myAIUIListener.answer;
         }
     }
@@ -107,7 +106,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
             mAIUIAgent.sendMessage(wakeupMsg);
         }
 
-        Log.i(TAG, "start text nlp");
+        LogUtils.d(TAG, "start text nlp");
         String params = "data_type=text,tag=text-tag";
         byte[] textData = question.getBytes(StandardCharsets.UTF_8);
 
@@ -126,7 +125,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         private CountDownLatch countDownLatch;
         private JSONObject resultEvent;
 
-        public void setCountDownLatch(CountDownLatch countDownLatch) {
+        private void setCountDownLatch(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
 
@@ -140,11 +139,15 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
 
         @Override
         public void onEvent(AIUIEvent event) {
-            Log.i(TAG, "on event: " + event.eventType);
+            LogUtils.d(TAG, "on event: " + event.eventType);
             switch (event.eventType) {
                 case AIUIConstant.EVENT_CONNECTED_TO_SERVER:
+                    // 连接到服务器
+                    LogUtils.d(TAG, "连接到服务器");
                     break;
                 case AIUIConstant.EVENT_SERVER_DISCONNECTED:
+                    // 与服务器断开连接
+                    LogUtils.d(TAG, "与服务器断开连接");
                     if (countDownLatch.getCount() == 1) {
                         countDownLatch.countDown();
                     }
@@ -164,11 +167,11 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                         if ("nlp".equals(sub)) {
                             if (content.has("cnt_id")) {
                                 String cnt_id = content.getString("cnt_id");
-                                JSONObject result = new JSONObject(new String(event.data.getByteArray(cnt_id), "utf-8"));
+                                JSONObject result = new JSONObject(new String(event.data.getByteArray(cnt_id), StandardCharsets.UTF_8));
                                 resultEvent = result;
                                 int rc = result.getJSONObject("intent").getInt("rc");
                                 if (rc != 0) {
-                                    Log.w(TAG, "nlp rc: " + rc);
+                                    LogUtils.d(TAG, "nlp rc: " + rc);
                                     countDownLatch.countDown();
                                 }
                                 answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
@@ -178,7 +181,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                         }
 
                     } catch (Throwable e) {
-                        Log.e(TAG, "Event during EVENT_RESULT e: " + e);
+                        LogUtils.d(TAG, "Event during EVENT_RESULT e: " + e);
                     } finally {
                         if (!useIFlytekTTS) {
                             countDownLatch.countDown();
@@ -187,8 +190,8 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     break;
                 case AIUIConstant.EVENT_ERROR:
                     //错误事件
-                    Log.e(TAG, "错误: " + event.arg1 + "，" + event.info);
-                    Log.e(TAG, "Error EVENT_ERROR: " + event.info);
+                    LogUtils.d(TAG, "错误: " + event.arg1 + "，" + event.info);
+                    LogUtils.d(TAG, "Error EVENT_ERROR: " + event.info);
                     countDownLatch.countDown();
                     break;
                 case AIUIConstant.EVENT_VAD:
@@ -224,25 +227,26 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     }
                     break;
                 case AIUIConstant.EVENT_CMD_RETURN:
+                    LogUtils.d(TAG, "EVENT_TTS: " + "EVENT_CMD_RETURN");
                     break;
                 case AIUIConstant.EVENT_TTS:
                     switch (event.arg1) {
                         case AIUIConstant.TTS_SPEAK_BEGIN:
-                            Log.i(TAG, "EVENT_TTS: " + "TTS_SPEAK_BEGIN");
+                            LogUtils.d(TAG, "EVENT_TTS: " + "TTS_SPEAK_BEGIN");
                             break;
                         case AIUIConstant.TTS_SPEAK_PROGRESS:
-                            Log.i(TAG, "EVENT_TTS: " + "TTS_SPEAK_PROGRESS");
+                            LogUtils.d(TAG, "EVENT_TTS: " + "TTS_SPEAK_PROGRESS");
                             break;
                         case AIUIConstant.TTS_SPEAK_PAUSED:
-                            Log.i(TAG, "EVENT_TTS: " + "TTS_SPEAK_PAUSED");
+                            LogUtils.d(TAG, "EVENT_TTS: " + "TTS_SPEAK_PAUSED");
                             break;
                         case AIUIConstant.TTS_SPEAK_RESUMED:
-                            Log.i(TAG, "EVENT_TTS: " + "TTS_SPEAK_RESUMED");
+                            LogUtils.d(TAG, "EVENT_TTS: " + "TTS_SPEAK_RESUMED");
                             break;
                         case AIUIConstant.TTS_SPEAK_COMPLETED:
-                            Log.i(TAG, "EVENT_TTS: " + "TTS_SPEAK_COMPLETED");
+                            LogUtils.d(TAG, "EVENT_TTS: " + "TTS_SPEAK_COMPLETED");
                             if (useIFlytekTTS) {
-                                Log.i(TAG, "EVENT_TTS: " + "TTS_SPEAK_COMPLETED in");
+                                LogUtils.d(TAG, "EVENT_TTS: " + "TTS_SPEAK_COMPLETED in");
                                 countDownLatch.countDown();
                             }
                             break;
@@ -269,9 +273,9 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
             try {
                 fSay.get();
             } catch (ExecutionException e) {
-                Log.e(TAG, "Error during Say", e);
+                LogUtils.d(TAG, e);
             } catch (CancellationException e) {
-                Log.i(TAG, "Interruption during Say");
+                LogUtils.d(TAG, "Interruption during Say");
             }
         }
     }
