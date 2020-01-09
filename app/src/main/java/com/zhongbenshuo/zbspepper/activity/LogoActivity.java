@@ -86,6 +86,8 @@ public class LogoActivity extends BaseActivity {
     private void checkPermission() {
         if (PermissionUtil.isNeedRequestPermission(this)) {
             showRequestPermissionDialog();
+        } else if (!Settings.System.canWrite(this)) {
+            showToWriteSettings();
         } else {
             getRSAPublicKey();
         }
@@ -120,6 +122,8 @@ public class LogoActivity extends BaseActivity {
         if (PermissionUtil.isNeedRequestPermission(this)) {
             // 权限被拒绝，提示用户到设置页面授予权限（防止用户点击了“不再提示”后，无法通过弹窗申请权限）
             showToSettings();
+        } else if (!Settings.System.canWrite(this)) {
+            showToWriteSettings();
         } else {
             getRSAPublicKey();
         }
@@ -136,9 +140,31 @@ public class LogoActivity extends BaseActivity {
             @Override
             public void onOKClick() {
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                intent.setData(uri);
+                intent.setData(Uri.fromParts("package", getPackageName(), null));
                 startActivityForResult(intent, 500);
+            }
+
+            @Override
+            public void onCancelClick() {
+                ActivityController.finishActivity(LogoActivity.this);
+            }
+        });
+        selectDialog.show();
+    }
+
+    /**
+     * 提示到设置页面授予修改系统设置权限
+     */
+    private void showToWriteSettings() {
+        SelectDialog selectDialog = new SelectDialog(mContext, getString(R.string.warning_to_write_setting_permission));
+        selectDialog.setButtonText(getString(R.string.Cancel), getString(R.string.Continue));
+        selectDialog.setCancelable(false);
+        selectDialog.setOnDialogClickListener(new SelectDialog.OnDialogClickListener() {
+            @Override
+            public void onOKClick() {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 600);
             }
 
             @Override
@@ -157,6 +183,15 @@ public class LogoActivity extends BaseActivity {
             if (PermissionUtil.isNeedRequestPermission(this)) {
                 // 权限被拒绝，提示用户到设置页面授予权限（防止用户点击了“不再提示”后，无法通过弹窗申请权限）
                 showToSettings();
+            } else {
+                getRSAPublicKey();
+            }
+        } else if (requestCode == 600) {
+            //Settings.System.canWrite方法检测授权结果
+            if (!Settings.System.canWrite(this)) {
+                showRequestPermissionDialog();
+            } else {
+                getRSAPublicKey();
             }
         }
     }

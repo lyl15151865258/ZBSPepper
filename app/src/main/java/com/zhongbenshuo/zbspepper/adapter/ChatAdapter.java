@@ -12,6 +12,7 @@ import com.zhongbenshuo.zbspepper.bean.ChatText;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,9 +28,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private List<ChatText> list;
     private RecyclerView rvChat;
 
-    public ChatAdapter(RecyclerView rv, List<ChatText> lv) {
+    public ChatAdapter(RecyclerView rv) {
         rvChat = rv;
-        list = lv;
+        list = new ArrayList<>();
     }
 
     @NotNull

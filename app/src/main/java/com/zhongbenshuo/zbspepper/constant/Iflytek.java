@@ -12,4 +12,6 @@ public class Iflytek {
 
     public static final String APP_ID = "5e15570f";
 
+    public static final String APP_KEY = "c90a30ea5266fe3918bf6492115363de";
+
 }

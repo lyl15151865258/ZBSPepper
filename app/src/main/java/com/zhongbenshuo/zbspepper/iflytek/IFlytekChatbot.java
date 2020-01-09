@@ -10,7 +10,11 @@ import com.aldebaran.qi.sdk.object.conversation.ReplyPriority;
 import com.aldebaran.qi.sdk.object.conversation.StandardReplyReaction;
 import com.aldebaran.qi.sdk.object.locale.Locale;
 import com.zhongbenshuo.zbspepper.R;
+import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.common.DirectSayReaction;
+import com.zhongbenshuo.zbspepper.constant.Constants;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * 人机对话过程中，讯飞语义理解对pepper听到的文本进行处理，执行语音合成。
@@ -34,6 +38,11 @@ public class IFlytekChatbot extends BaseChatbot {
             String text = phrase.getText();
             if (!text.isEmpty()) {
                 Log.d(TAG, "nuance cloud asr string is :" + text);
+                // 通过EventBus发送给UI界面更新对话列表
+                EventMsg msg = new EventMsg();
+                msg.setTag(Constants.LISTEN);
+                msg.setMsg(text);
+                EventBus.getDefault().post(msg);
                 // 讯飞的nlp与tts处理nuance得到的文本。
                 IFlytekNlpReaction iFlytekNlpReaction = new IFlytekNlpReaction(qiContent, text);
                 // tts执行后，pepper发起听。
@@ -42,7 +51,12 @@ public class IFlytekChatbot extends BaseChatbot {
         }
         Log.d(TAG, "answer empty: ");
         // pepper 没有听到时兜底语音。
-        DirectSayReaction directSayReac = new DirectSayReaction(qiContent, this.qiContent.getResources().getString(R.string.fallback_answer));
+        DirectSayReaction directSayReac = new DirectSayReaction(qiContent, qiContent.getResources().getString(R.string.fallback_answer));
+        // 通过EventBus发送给UI界面更新对话列表
+        EventMsg msg = new EventMsg();
+        msg.setTag(Constants.REPLY_BLURRY);
+        msg.setMsg(qiContent.getResources().getString(R.string.fallback_answer));
+        EventBus.getDefault().post(msg);
         return new StandardReplyReaction(directSayReac, ReplyPriority.FALLBACK);
     }
 

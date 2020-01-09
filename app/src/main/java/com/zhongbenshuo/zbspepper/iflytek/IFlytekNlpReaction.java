@@ -15,9 +15,12 @@ import com.iflytek.aiui.AIUIEvent;
 import com.iflytek.aiui.AIUIListener;
 import com.iflytek.aiui.AIUIMessage;
 import com.zhongbenshuo.zbspepper.R;
+import com.zhongbenshuo.zbspepper.bean.EventMsg;
+import com.zhongbenshuo.zbspepper.constant.Constants;
 import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -177,6 +180,11 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                 answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
                                 SPHelper.save("NlpAnswer", answer);
                                 LogUtils.d(TAG, "讯飞AIUI回复：" + answer);
+                                // 通过EventBus发送给UI界面更新对话列表
+                                EventMsg msg = new EventMsg();
+                                msg.setTag(Constants.REPLY_CLEAR);
+                                msg.setMsg(answer);
+                                EventBus.getDefault().post(msg);
                             }
                         }
 
