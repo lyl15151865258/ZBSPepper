@@ -9,28 +9,33 @@ import android.graphics.Paint;
 import android.graphics.PathEffect;
 import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
+import android.view.WindowManager;
 
-import com.zhongbenshuo.zbspepper.utils.LogUtils;
+import static android.content.Context.WINDOW_SERVICE;
 
 @SuppressLint("DrawAllocation")
 public class LinedEditText extends AppCompatEditText {
 
+    private Context mContext;
     private Paint mPaint = new Paint();
 
     public LinedEditText(Context context) {
         super(context);
+        mContext = context;
         initPaint();
     }
 
 
     public LinedEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
         initPaint();
     }
 
 
     public LinedEditText(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mContext = context;
         initPaint();
     }
 
@@ -50,28 +55,24 @@ public class LinedEditText extends AppCompatEditText {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        int left = getLeft();
-        int right = getRight();
+        WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
+        int windowWidth = wm.getDefaultDisplay().getWidth();
+        int windowHeight = wm.getDefaultDisplay().getHeight();
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.BLACK);
         int paddingTop = getPaddingTop();
         int paddingBottom = getPaddingBottom();
-        int paddingLeft = getPaddingLeft();
-        int paddingRight = getPaddingRight();
-        int height = getHeight();
+        int scrollY = getScrollY();
+        int scrollX = getScrollX() + windowWidth;
+        int innerHeight = scrollY + getHeight() - paddingBottom;
         int lineHeight = getLineHeight();
-        float spacingHeight = getLineSpacingExtra();
-        int count = (height - paddingTop - paddingBottom) / (int) (lineHeight * getLineSpacingMultiplier());
-        LogUtils.d("带虚线输入框", "left：" + left + ",right：" + right + ",paddingTop：" + paddingTop +
-                ",paddingBottom：" + paddingBottom + ",paddingLeft：" + paddingLeft + ",paddingRight：" + paddingRight +
-                ",height：" + height + ",lineHeight：" + lineHeight + ",spacingHeight：" + spacingHeight);
-
-        for (int i = 0; i < count; i++) {
-            float baseline = lineHeight * getLineSpacingMultiplier() * (i + 1) + paddingTop - spacingHeight / 2;
-            canvas.drawLine(left + paddingLeft, baseline, right - paddingRight, baseline, mPaint);
-
-            LogUtils.d("带虚线输入框", "startX：" + (left + paddingLeft) + ",startY：" + baseline +
-                    ",stopX：" + (right - paddingRight) + ",stopY：" + baseline + ",baseline：" + baseline);
+        int baseLine = scrollY + (lineHeight - ((scrollY - paddingTop) % lineHeight));
+        int x = 8;
+        while (baseLine < innerHeight) {
+            canvas.drawLine(x, baseLine, scrollX - x, baseLine, paint);
+            baseLine += lineHeight;
         }
-
         super.onDraw(canvas);
     }
 }

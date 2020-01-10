@@ -178,8 +178,14 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                     countDownLatch.countDown();
                                 }
                                 answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
-                                SPHelper.save("NlpAnswer", answer);
                                 LogUtils.d(TAG, "讯飞AIUI回复：" + answer);
+                                // 古诗词有[k3]开头和[k0]结尾
+                                answer = answer.replaceAll("\\[k0]", "")
+                                        .replaceAll("\\[k1]", "")
+                                        .replaceAll("\\[k2]", "")
+                                        .replaceAll("\\[k3]", "")
+                                        .replaceAll("\\[]", "");
+                                SPHelper.save("NlpAnswer", answer);
                                 // 通过EventBus发送给UI界面更新对话列表
                                 EventMsg msg = new EventMsg();
                                 msg.setTag(Constants.REPLY_CLEAR);

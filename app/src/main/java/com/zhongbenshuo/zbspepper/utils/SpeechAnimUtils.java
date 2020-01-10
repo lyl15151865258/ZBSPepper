@@ -15,8 +15,8 @@ public class SpeechAnimUtils {
 	 * 开始动画
 	 */
 	public static void StartAnim(WaveView waveView) {
-		waveView.setDuration(5000);//一个波纹从创建到消失的时间
-		waveView.setInitialRadius(73);//设置半径
+		waveView.setDuration(4000);//一个波纹从创建到消失的时间
+		waveView.setInitialRadius(45);//设置半径
 		waveView.setStyle(Paint.Style.STROKE);//设置扩散风格（STROKE：线   fill:面）
 		waveView.setColor(Color.parseColor("#0BB6A8"));//设置颜色
 		waveView.setSpeed(500);//波纹创建速度（500ms）

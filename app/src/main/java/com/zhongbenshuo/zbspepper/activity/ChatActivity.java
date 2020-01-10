@@ -14,24 +14,9 @@ import com.aldebaran.qi.sdk.QiSDK;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
 import com.aldebaran.qi.sdk.builder.ChatBuilder;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
-import com.aldebaran.qi.sdk.object.conversation.AutonomousReaction;
-import com.aldebaran.qi.sdk.object.conversation.AutonomousReactionImportance;
-import com.aldebaran.qi.sdk.object.conversation.AutonomousReactionValidity;
-import com.aldebaran.qi.sdk.object.conversation.BodyLanguageOption;
-import com.aldebaran.qi.sdk.object.conversation.Bookmark;
-import com.aldebaran.qi.sdk.object.conversation.BookmarkStatus;
+import com.aldebaran.qi.sdk.design.activity.RobotActivity;
 import com.aldebaran.qi.sdk.object.conversation.Chat;
-import com.aldebaran.qi.sdk.object.conversation.EditablePhraseSet;
-import com.aldebaran.qi.sdk.object.conversation.Phrase;
-import com.aldebaran.qi.sdk.object.conversation.PhraseSet;
-import com.aldebaran.qi.sdk.object.conversation.QiChatExecutor;
-import com.aldebaran.qi.sdk.object.conversation.QiChatVariable;
-import com.aldebaran.qi.sdk.object.conversation.QiChatbot;
-import com.aldebaran.qi.sdk.object.conversation.ReplyReaction;
 import com.aldebaran.qi.sdk.object.conversation.Say;
-import com.aldebaran.qi.sdk.object.conversation.Topic;
-import com.aldebaran.qi.sdk.object.conversation.TopicStatus;
-import com.aldebaran.qi.sdk.object.locale.Locale;
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.adapter.ChatAdapter;
 import com.zhongbenshuo.zbspepper.bean.ChatText;
@@ -48,7 +33,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,8 +43,9 @@ import java.util.Map;
  * @version : 2020/1/7 0007 23:32
  */
 
-public class ChatActivity extends BaseActivity {
+public class ChatActivity extends RobotActivity {
 
+    private static final String TAG = "ChatActivity";
     private Context mContext;
     private ChatAdapter chatAdapter;
     private WaveView wave;
@@ -69,6 +54,7 @@ public class ChatActivity extends BaseActivity {
     private Say mSay;
     private boolean isChat = false;
     private String wakeupContent = null;
+    private boolean isFirst = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,12 +146,15 @@ public class ChatActivity extends BaseActivity {
                     .build();
 
             // 在主线程中更新list
-            runOnUiThread(() -> {
-                if (wakeupContent != null) {
-                    chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.LISTEN, wakeupContent));
-                }
-                chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.REPLY_CLEAR, getResources().getString(R.string.greeting)));
-            });
+            if (isFirst) {
+                runOnUiThread(() -> {
+                    if (wakeupContent != null) {
+                        chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.LISTEN, wakeupContent));
+                    }
+                    chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.REPLY_CLEAR, getResources().getString(R.string.greeting)));
+                });
+                isFirst = false;
+            }
 
             // 讯飞AIUI平台APPID和APPKEY
             Map<String, String> myAsrParams = new HashMap<>(2);
@@ -173,225 +162,12 @@ public class ChatActivity extends BaseActivity {
             myJson = "{\"appid\":\"5e15570f\",\"headid\": \"AP990396A08Y76100013\",\"key\": \"c90a30ea5266fe3918bf6492115363de\"}";
             myAsrParams.put("iflytek", myJson);
 
-            QiChatbot qiChatbot = new QiChatbot() {
-                @Override
-                public Async async() {
-                    return null;
-                }
-
-                @Override
-                public PhraseSet concept(String conceptName) {
-                    return null;
-                }
-
-                @Override
-                public EditablePhraseSet dynamicConcept(String conceptName) {
-                    return null;
-                }
-
-                @Override
-                public void goToBookmark(Bookmark bookmark, AutonomousReactionImportance importance, AutonomousReactionValidity validity) {
-
-                }
-
-                @Override
-                public BookmarkStatus bookmarkStatus(Bookmark bookmark) {
-                    return null;
-                }
-
-                @Override
-                public TopicStatus topicStatus(Topic topic) {
-                    return null;
-                }
-
-                @Override
-                public QiChatVariable variable(String varName) {
-                    return null;
-                }
-
-                @Override
-                public List<Phrase> globalRecommendations(Integer maxRecommendations) {
-                    return null;
-                }
-
-                @Override
-                public List<Phrase> scopeRecommendations(Integer maxRecommendations) {
-                    return null;
-                }
-
-                @Override
-                public List<Phrase> focusedTopicRecommendations(Integer maxRecommendations) {
-                    return null;
-                }
-
-                @Override
-                public void setOnBookmarkReachedListener(OnBookmarkReachedListener onBookmarkReachedListener) {
-
-                }
-
-                @Override
-                public void addOnBookmarkReachedListener(OnBookmarkReachedListener onBookmarkReachedListener) {
-
-                }
-
-                @Override
-                public void removeOnBookmarkReachedListener(OnBookmarkReachedListener onBookmarkReachedListener) {
-
-                }
-
-                @Override
-                public void removeAllOnBookmarkReachedListeners() {
-
-                }
-
-                @Override
-                public void setOnEndedListener(OnEndedListener onEndedListener) {
-
-                }
-
-                @Override
-                public void addOnEndedListener(OnEndedListener onEndedListener) {
-
-                }
-
-                @Override
-                public void removeOnEndedListener(OnEndedListener onEndedListener) {
-
-                }
-
-                @Override
-                public void removeAllOnEndedListeners() {
-
-                }
-
-                @Override
-                public List<Topic> getTopics() {
-                    return null;
-                }
-
-                @Override
-                public Topic getFocusedTopic() {
-                    return null;
-                }
-
-                @Override
-                public void setOnFocusedTopicChangedListener(OnFocusedTopicChangedListener onFocusedTopicChangedListener) {
-
-                }
-
-                @Override
-                public void addOnFocusedTopicChangedListener(OnFocusedTopicChangedListener onFocusedTopicChangedListener) {
-
-                }
-
-                @Override
-                public void removeOnFocusedTopicChangedListener(OnFocusedTopicChangedListener onFocusedTopicChangedListener) {
-
-                }
-
-                @Override
-                public void removeAllOnFocusedTopicChangedListeners() {
-
-                }
-
-                @Override
-                public BodyLanguageOption getSpeakingBodyLanguage() {
-                    return null;
-                }
-
-                @Override
-                public void setSpeakingBodyLanguage(BodyLanguageOption bodyLanguageOption) {
-
-                }
-
-                @Override
-                public Map<String, QiChatExecutor> getExecutors() {
-                    return null;
-                }
-
-                @Override
-                public void setExecutors(Map<String, QiChatExecutor> executors) {
-
-                }
-
-                @Override
-                public ReplyReaction replyTo(Phrase phrase, Locale locale) {
-                    return null;
-                }
-
-                @Override
-                public void acknowledgeHeard(Phrase phrase, Locale locale) {
-
-                }
-
-                @Override
-                public void acknowledgeSaid(Phrase phrase, Locale locale) {
-
-                }
-
-                @Override
-                public AutonomousReaction getAutonomousReaction() {
-                    return null;
-                }
-
-                @Override
-                public void setOnAutonomousReactionChangedListener(OnAutonomousReactionChangedListener onAutonomousReactionChangedListener) {
-
-                }
-
-                @Override
-                public void addOnAutonomousReactionChangedListener(OnAutonomousReactionChangedListener onAutonomousReactionChangedListener) {
-
-                }
-
-                @Override
-                public void removeOnAutonomousReactionChangedListener(OnAutonomousReactionChangedListener onAutonomousReactionChangedListener) {
-
-                }
-
-                @Override
-                public void removeAllOnAutonomousReactionChangedListeners() {
-
-                }
-
-                @Override
-                public Integer getMaxHypothesesPerUtterance() {
-                    return null;
-                }
-
-                @Override
-                public void setMaxHypothesesPerUtterance(Integer maxHypothesesPerUtterance) {
-
-                }
-
-                @Override
-                public void setOnMaxHypothesesPerUtteranceChangedListener(OnMaxHypothesesPerUtteranceChangedListener onMaxHypothesesPerUtteranceChangedListener) {
-
-                }
-
-                @Override
-                public void addOnMaxHypothesesPerUtteranceChangedListener(OnMaxHypothesesPerUtteranceChangedListener onMaxHypothesesPerUtteranceChangedListener) {
-
-                }
-
-                @Override
-                public void removeOnMaxHypothesesPerUtteranceChangedListener(OnMaxHypothesesPerUtteranceChangedListener onMaxHypothesesPerUtteranceChangedListener) {
-
-                }
-
-                @Override
-                public void removeAllOnMaxHypothesesPerUtteranceChangedListeners() {
-
-                }
-            };
-
             mSay.async().run().andThenConsume(consume -> {
                 // 自定义讯飞Chatbot。
                 IFlytekChatbot iflytekChatbot = new IFlytekChatbot(qiContext, mContext);
 
                 // 创建chat。
                 mChat = ChatBuilder.with(qiContext)
-                        .withChatbot(qiChatbot)
                         .withChatbot(iflytekChatbot)
                         .withAsrDriverParameters(myAsrParams)
                         .build();
