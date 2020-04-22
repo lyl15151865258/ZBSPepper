@@ -3,7 +3,6 @@ package com.zhongbenshuo.zbspepper.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
@@ -42,16 +41,14 @@ public class MessageBoardActivity extends BaseActivity {
 
     // 禁止显示软键盘
     public void disableShowInput() {
-        if (android.os.Build.VERSION.SDK_INT <= 10) {
-            etMessage.setInputType(InputType.TYPE_NULL);
-        } else {
             Class<EditText> cls = EditText.class;
             Method method;
             try {
                 method = cls.getMethod("setShowSoftInputOnFocus", boolean.class);
                 method.setAccessible(true);
                 method.invoke(etMessage, false);
-            } catch (Exception e) {//TODO: handle exception
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             try {
                 method = cls.getMethod("setSoftInputShownOnFocus", boolean.class);
@@ -60,7 +57,6 @@ public class MessageBoardActivity extends BaseActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
     }
 
     private TextWatcher textWatcher = new TextWatcher() {

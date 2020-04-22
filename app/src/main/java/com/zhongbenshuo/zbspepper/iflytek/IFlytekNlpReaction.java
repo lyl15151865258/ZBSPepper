@@ -186,11 +186,17 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                         .replaceAll("\\[k3]", "")
                                         .replaceAll("\\[]", "");
                                 SPHelper.save("NlpAnswer", answer);
-                                // 通过EventBus发送给UI界面更新对话列表
-                                EventMsg msg = new EventMsg();
-                                msg.setTag(Constants.REPLY_CLEAR);
-                                msg.setMsg(answer);
-                                EventBus.getDefault().post(msg);
+                                if (answer.equals("退出") || answer.equals("返回")) {
+                                    EventMsg msg = new EventMsg();
+                                    msg.setTag(Constants.EXIT);
+                                    EventBus.getDefault().post(msg);
+                                } else {
+                                    // 通过EventBus发送给UI界面更新对话列表
+                                    EventMsg msg = new EventMsg();
+                                    msg.setTag(Constants.REPLY_CLEAR);
+                                    msg.setMsg(answer);
+                                    EventBus.getDefault().post(msg);
+                                }
                             }
                         }
 

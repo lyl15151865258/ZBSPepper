@@ -134,6 +134,7 @@
             android:name=".activity.MessageBoardActivity"
             android:configChanges="locale"
             android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden"
             android:screenOrientation="sensorLandscape" />
 
         <!-- 年会专栏页面 -->

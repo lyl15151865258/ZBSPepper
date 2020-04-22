@@ -107,6 +107,10 @@ public class ChatActivity extends RobotActivity {
                 // 听不清的回复
                 chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.REPLY_BLURRY, msg.getMsg()));
                 break;
+            case Constants.EXIT:
+                // 退出对话页面
+                ActivityController.finishActivity(this);
+                break;
             default:
                 break;
         }

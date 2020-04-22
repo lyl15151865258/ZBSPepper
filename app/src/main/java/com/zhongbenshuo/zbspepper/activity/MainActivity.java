@@ -5,10 +5,18 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.aldebaran.qi.sdk.QiContext;
+import com.aldebaran.qi.sdk.QiSDK;
+import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
+import com.aldebaran.qi.sdk.builder.SayBuilder;
+import com.aldebaran.qi.sdk.object.conversation.Say;
+import com.aldebaran.qi.sdk.object.touch.Touch;
+import com.aldebaran.qi.sdk.object.touch.TouchSensor;
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.adapter.MenuAdapter;
 import com.zhongbenshuo.zbspepper.bean.Menu;
 import com.zhongbenshuo.zbspepper.iflytek.WakeUpUtil;
+import com.zhongbenshuo.zbspepper.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +54,8 @@ public class MainActivity extends BaseActivity {
         MenuAdapter menuAdapter = new MenuAdapter(mContext, menuList);
         menuAdapter.setOnItemClickListener(onItemClickListener);
         rvMenu.setAdapter(menuAdapter);
+
+        QiSDK.register(this, robotLifecycleCallbacks);
     }
 
     private MenuAdapter.OnItemClickListener onItemClickListener = (view, position) -> {
@@ -79,6 +89,41 @@ public class MainActivity extends BaseActivity {
         }
     };
 
+    private RobotLifecycleCallbacks robotLifecycleCallbacks = new RobotLifecycleCallbacks() {
+        // 该onRobotFocusGained和onRobotFocusLost方法在后台线程执行，所以当我们将同步使用QiSDK UI线程不会被阻塞。
+        @Override
+        public void onRobotFocusGained(QiContext qiContext) {
+            // 获得焦点
+            LogUtils.d(TAG, "获取到焦点");
+            Touch touch = qiContext.getTouch();
+
+            // 头部传感器
+            TouchSensor touchSensor = touch.getSensor("Head/Touch");
+            touchSensor.addOnStateChangedListener(touchState -> {
+                LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
+                if (touchState.getTouched()) {
+                    Say mSay = SayBuilder.with(qiContext)
+                            .withText("摸我的头，我会容易睡着哒")
+                            .build();
+                    mSay.run();
+                }
+            });
+
+        }
+
+        @Override
+        public void onRobotFocusLost() {
+            // 失去焦点
+            LogUtils.d(TAG, "失去焦点");
+        }
+
+        @Override
+        public void onRobotFocusRefused(String reason) {
+            // 获得焦点被拒绝
+            LogUtils.d(TAG, "获得焦点被拒绝");
+        }
+    };
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -95,6 +140,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         wakeUpUtil.onDestroy();
+        QiSDK.unregister(this, robotLifecycleCallbacks);
         super.onDestroy();
     }
 
