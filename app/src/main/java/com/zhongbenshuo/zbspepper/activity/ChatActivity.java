@@ -163,7 +163,7 @@ public class ChatActivity extends RobotActivity {
             // 讯飞AIUI平台APPID和APPKEY
             Map<String, String> myAsrParams = new HashMap<>(2);
             String myJson;
-            myJson = "{\"appid\":\"5e15570f\",\"headid\": \"AP990396A08Y76100013\",\"key\": \"c90a30ea5266fe3918bf6492115363de\"}";
+            myJson = "{\"appid\":\"5ee96c8d\",\"headid\": \"AP990396A08Y76100013\",\"key\": \"1527905efb15923a4a59cbcea1ba3c54\"}";
             myAsrParams.put("iflytek", myJson);
 
             mSay.async().run().andThenConsume(consume -> {

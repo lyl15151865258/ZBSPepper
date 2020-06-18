@@ -52,7 +52,7 @@ public class WakeUpUtil {
             // 清空参数
             voiceWakeuper.setParameter(SpeechConstant.PARAMS, null);
             // 唤醒门限值，根据资源携带的唤醒词个数按照“id:门限;id:门限”的格式传入
-            voiceWakeuper.setParameter(SpeechConstant.IVW_THRESHOLD, "0:" + curThresh + ";" + "1:" + curThresh + ";" + "2:" + curThresh + ";" + "3:" + curThresh + ";" + "4:" + curThresh);
+            voiceWakeuper.setParameter(SpeechConstant.IVW_THRESHOLD, "0:" + curThresh + ";");
             // 设置唤醒模式
             voiceWakeuper.setParameter(SpeechConstant.IVW_SST, "wakeup");
             // 设置持续进行唤醒
@@ -139,19 +139,7 @@ public class WakeUpUtil {
                 String wakeupContent = null;
                 switch (object.optString("id")) {
                     case "0":
-                        wakeupContent = "小硕小硕";
-                        break;
-                    case "1":
-                        wakeupContent = "你好小硕";
-                        break;
-                    case "2":
-                        wakeupContent = "小硕你好";
-                        break;
-                    case "3":
-                        wakeupContent = "你好硕硕";
-                        break;
-                    case "4":
-                        wakeupContent = "硕硕你好";
+                        wakeupContent = "齐天大圣";
                         break;
                     default:
                         break;
@@ -195,5 +183,15 @@ public class WakeUpUtil {
 
         }
     };
+
+    /**
+     * 销毁VoiceWakeuper
+     */
+    private void destroy() {
+        voiceWakeuper = VoiceWakeuper.getWakeuper();
+        if (voiceWakeuper != null) {
+            voiceWakeuper.destroy();
+        }
+    }
 
 }

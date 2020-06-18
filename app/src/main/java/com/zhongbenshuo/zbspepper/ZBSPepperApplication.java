@@ -89,7 +89,7 @@ public class ZBSPepperApplication extends Application {
 
         // 注意： appid 必须和下载的SDK保持一致，否则会出现10407错误
         StringBuilder param = new StringBuilder();
-        param.append("appid=" + Iflytek.APP_ID);
+        param.append(SpeechConstant.APPID + "=" + Iflytek.APP_ID);
         param.append(",");
         // 设置使用v5+
         param.append(SpeechConstant.ENGINE_MODE + "=" + SpeechConstant.MODE_MSC);
