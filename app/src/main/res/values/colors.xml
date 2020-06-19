@@ -128,4 +128,8 @@
     <color name="value_normal">#3AF33A</color>
     <color name="value_high">#F65454</color>
 
+
+    <color name="speech_bar_listening">#00d7ff</color>
+    <color name="speech_bar_not_listening">#706565</color>
+
 </resources>

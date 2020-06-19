@@ -184,14 +184,4 @@ public class WakeUpUtil {
         }
     };
 
-    /**
-     * 销毁VoiceWakeuper
-     */
-    private void destroy() {
-        voiceWakeuper = VoiceWakeuper.getWakeuper();
-        if (voiceWakeuper != null) {
-            voiceWakeuper.destroy();
-        }
-    }
-
 }

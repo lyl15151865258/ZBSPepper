@@ -14,7 +14,6 @@ import com.aldebaran.qi.sdk.QiSDK;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
 import com.aldebaran.qi.sdk.builder.ChatBuilder;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
-import com.aldebaran.qi.sdk.design.activity.RobotActivity;
 import com.aldebaran.qi.sdk.object.conversation.Chat;
 import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.zhongbenshuo.zbspepper.R;
@@ -22,11 +21,11 @@ import com.zhongbenshuo.zbspepper.adapter.ChatAdapter;
 import com.zhongbenshuo.zbspepper.bean.ChatText;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.constant.Constants;
+import com.zhongbenshuo.zbspepper.design.activity.conversationstatus.ConversationStatusBinder;
+import com.zhongbenshuo.zbspepper.design.speechbar.SpeechBarView;
 import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
 import com.zhongbenshuo.zbspepper.utils.ActivityController;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
-import com.zhongbenshuo.zbspepper.utils.SpeechAnimUtils;
-import com.zhongbenshuo.zbspepper.widget.WaveView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -43,12 +42,11 @@ import java.util.Map;
  * @version : 2020/1/7 0007 23:32
  */
 
-public class ChatActivity extends RobotActivity {
+public class ChatActivity extends BaseActivity {
 
     private static final String TAG = "ChatActivity";
     private Context mContext;
     private ChatAdapter chatAdapter;
-    private WaveView wave;
     private ImageView input;
     private Chat mChat;
     private Say mSay;
@@ -56,15 +54,19 @@ public class ChatActivity extends RobotActivity {
     private String wakeupContent = null;
     private boolean isFirst = true;
 
+    private SpeechBarView speechBarView;
+    private final ConversationStatusBinder conversationStatusBinder = new ConversationStatusBinder();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_chat);
 
+        speechBarView = findViewById(R.id.speech_bar);
+
         findViewById(R.id.ivBack).setOnClickListener(onClickListener);
 
-        wave = findViewById(R.id.wave);
         input = findViewById(R.id.input);
         RecyclerView rvChat = findViewById(R.id.rvChat);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
@@ -81,10 +83,6 @@ public class ChatActivity extends RobotActivity {
         }
 
         QiSDK.register(this, robotLifecycleCallbacks);
-
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
     }
 
     /**
@@ -124,11 +122,9 @@ public class ChatActivity extends RobotActivity {
             case R.id.input:
                 if (isChat) {
                     isChat = false;
-                    SpeechAnimUtils.stopImmediately(wave);
                     input.setImageResource(R.drawable.im_speech_voice);
                 } else {
                     isChat = true;
-                    SpeechAnimUtils.StartAnim(wave);
                     input.setImageResource(R.drawable.anim_speech_button);
                     AnimationDrawable ani = (AnimationDrawable) input.getDrawable();
                     ani.start();
@@ -145,6 +141,9 @@ public class ChatActivity extends RobotActivity {
         public void onRobotFocusGained(QiContext qiContext) {
             // 获得焦点
             LogUtils.d(TAG, "获取到焦点");
+
+            conversationStatusBinder.bind(qiContext, speechBarView);
+
             mSay = SayBuilder.with(qiContext)
                     .withText(getResources().getString(R.string.greeting))
                     .build();
@@ -195,6 +194,7 @@ public class ChatActivity extends RobotActivity {
         public void onRobotFocusLost() {
             // 失去焦点
             LogUtils.d(TAG, "失去焦点");
+            conversationStatusBinder.unbind(false);
         }
 
         @Override
@@ -207,9 +207,7 @@ public class ChatActivity extends RobotActivity {
     @Override
     protected void onDestroy() {
         QiSDK.unregister(this, robotLifecycleCallbacks);
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
+        conversationStatusBinder.unbind(false);
         super.onDestroy();
     }
 

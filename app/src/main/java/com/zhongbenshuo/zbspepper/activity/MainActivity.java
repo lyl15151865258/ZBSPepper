@@ -1,5 +1,6 @@
 package com.zhongbenshuo.zbspepper.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,6 +32,7 @@ import java.util.List;
 
 public class MainActivity extends BaseActivity {
 
+    private Context mContext;
     private TextView tvBottom;
     private WakeUpUtil wakeUpUtil;
 
@@ -38,7 +40,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mContext = this;
         RecyclerView rvMenu = findViewById(R.id.rvMenu);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
         rvMenu.setLayoutManager(gridLayoutManager);
@@ -51,7 +53,7 @@ public class MainActivity extends BaseActivity {
         rvMenu.setAdapter(menuAdapter);
 
         tvBottom = findViewById(R.id.tvBottom);
-        tvBottom.setText("您可以这样问我：明天的天气怎么样？");
+        tvBottom.setText("您可以说“齐天大圣”与我进行对话");
         tvBottom.setOnClickListener((onClickListener) -> openActivity(ChatActivity.class));
 
         QiSDK.register(this, robotLifecycleCallbacks);

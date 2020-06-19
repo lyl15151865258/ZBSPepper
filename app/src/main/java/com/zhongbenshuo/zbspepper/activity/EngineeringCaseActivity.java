@@ -1,6 +1,5 @@
 package com.zhongbenshuo.zbspepper.activity;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
@@ -22,13 +21,12 @@ import com.zhongbenshuo.zbspepper.utils.ActivityController;
 
 public class EngineeringCaseActivity extends BaseActivity {
 
-    private Context mContext;
+    private WakeUpUtil wakeUpUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company_profile);
-        mContext = this;
 
         findViewById(R.id.ivBack).setOnClickListener(onClickListener);
 
@@ -55,7 +53,19 @@ public class EngineeringCaseActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         // 初始化唤醒对象
-        WakeUpUtil.getInstance(this);
+        wakeUpUtil = WakeUpUtil.getInstance(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wakeUpUtil.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        wakeUpUtil.onDestroy();
     }
 
 }
