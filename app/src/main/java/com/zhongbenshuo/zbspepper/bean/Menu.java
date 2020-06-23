@@ -2,31 +2,19 @@ package com.zhongbenshuo.zbspepper.bean;
 
 public class Menu {
 
-    // 当前按钮的ID
-    private int id;
-
     // 菜单图标资源ID
     private int menuImg;
 
     // 菜单文本内容
     private String menuText;
 
-    // 是否可以点击
-    private boolean enable;
+    // 当前是否被选中
+    private boolean selected;
 
-    public Menu(int id, int menuImg, String menuText, boolean enable) {
-        this.id = id;
+    public Menu(int menuImg, String menuText, boolean selected) {
         this.menuImg = menuImg;
         this.menuText = menuText;
-        this.enable = enable;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.selected = selected;
     }
 
     public int getMenuImg() {
@@ -45,11 +33,11 @@ public class Menu {
         this.menuText = menuText;
     }
 
-    public boolean isEnable() {
-        return enable;
+    public boolean isSelected() {
+        return selected;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

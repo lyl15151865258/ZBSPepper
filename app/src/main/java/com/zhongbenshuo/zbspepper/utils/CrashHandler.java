@@ -124,7 +124,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 
         ActivityManager am = (ActivityManager) mContext.getSystemService(ACTIVITY_SERVICE);
         if (am != null) {
-            am.killBackgroundProcesses("com.zhongbenshuo.air");
+            am.killBackgroundProcesses("com.zhongbenshuo.zbspepper");
         }
         android.os.Process.killProcess(android.os.Process.myPid());
         return true;
@@ -203,7 +203,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
             // 将崩溃信息写入txt文件
             String model = Build.MODEL;
             String fileName;
-            fileName = "EmployeeStatus-" + TimeUtils.getCurrentFormatDateTime() + "-" + model + ".txt";
+            fileName = "ZbsPepper-" + TimeUtils.getCurrentFormatDateTime() + "-" + model + ".txt";
             String path = getRoot();
             File dir = new File(path);
             if (!dir.exists()) {
@@ -219,9 +219,9 @@ public class CrashHandler implements UncaughtExceptionHandler {
 
     private String getRoot() {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return Environment.getExternalStorageDirectory().getAbsolutePath() + "/CrashInfo/EmployeeStatus";
+            return Environment.getExternalStorageDirectory().getAbsolutePath() + "/CrashInfo/ZbsPepper";
         } else {
-            return "/CrashInfo/EmployeeStatus";
+            return "/CrashInfo/ZbsPepper";
         }
     }
 

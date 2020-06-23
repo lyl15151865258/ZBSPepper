@@ -1,10 +1,12 @@
 package com.zhongbenshuo.zbspepper.utils;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,12 +15,17 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
+import android.widget.Toast;
+
+import com.zhongbenshuo.zbspepper.bean.AppInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by LiYuliang on 2017/10/9.
@@ -32,10 +39,6 @@ public class ApkUtils {
 
     /**
      * 获取Apk文件的Log图标
-     *
-     * @param context
-     * @param apk_path
-     * @return
      */
     public static Drawable getApkThumbnail(Context context, String apk_path) {
         if (context == null) {
@@ -58,9 +61,6 @@ public class ApkUtils {
 
     /**
      * 获取Drawable实际占用大小
-     *
-     * @param drawable
-     * @return
      */
     public static int getDrawableSize(Drawable drawable) {
 
@@ -371,4 +371,184 @@ public class ApkUtils {
         }
         return 0;
     }
+
+    /**
+     * 查询手机内所有应用
+     */
+    public static List<PackageInfo> getAllApps(Context context) {
+        PackageManager pManager = context.getPackageManager();
+        //获取手机内所有应用
+        return pManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+    }
+
+    /**
+     * 查询手机内手动安装的应用
+     */
+    public static List<PackageInfo> getAllUserApps(Context context) {
+        List<PackageInfo> apps = new ArrayList<>();
+        PackageManager pManager = context.getPackageManager();
+        //获取手机内所有应用
+        List<PackageInfo> paklist = pManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+        for (int i = 0; i < paklist.size(); i++) {
+            PackageInfo pak = paklist.get(i);
+            //判断是否为非系统预装的应用程序
+            if ((pak.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
+                apps.add(pak);
+            }
+        }
+        return apps;
+    }
+
+    /**
+     * 查询手机内系统预装应用
+     */
+    public static List<PackageInfo> getAllSystemApps(Context context) {
+        List<PackageInfo> apps = new ArrayList<>();
+        PackageManager pManager = context.getPackageManager();
+        //获取手机内所有应用
+        List<PackageInfo> paklist = pManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+        for (int i = 0; i < paklist.size(); i++) {
+            PackageInfo pak = paklist.get(i);
+            //判断是否为非系统预装的应用程序
+            if ((pak.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0) {
+                apps.add(pak);
+            }
+        }
+        return apps;
+    }
+
+    /**
+     * 查询手机内所有的应用
+     */
+    public static List<AppInfo> scanApps(Context context) {
+        List<AppInfo> appInfoList = new ArrayList<>();
+        Intent intent = new Intent(Intent.ACTION_MAIN, null);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        PackageManager pManager = context.getPackageManager();
+        List<ResolveInfo> appList = pManager.queryIntentActivities(intent, 0);
+        for (ResolveInfo info : appList) {
+            String appName = info.loadLabel(context.getPackageManager()).toString();
+            Drawable appIcon = info.loadIcon(context.getPackageManager());
+            String packageName = info.activityInfo.packageName;
+            appInfoList.add(new AppInfo(appName, appIcon, packageName));
+        }
+        LogUtils.d("ApkUtils", "本次扫描到" + appInfoList.size() + "个应用");
+        return appInfoList;
+    }
+
+    /**
+     * 查询手机内所有支持分享的应用
+     */
+    public static List<ResolveInfo> getShareApps(Context context) {
+        Intent intent = new Intent(Intent.ACTION_SEND, null);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setType("text/plain");
+        PackageManager pManager = context.getPackageManager();
+        return pManager.queryIntentActivities(intent, 0);
+    }
+
+    /**
+     * 通过指定的包名打开应用
+     *
+     * @param context     上下文
+     * @param packageName 指定启动的包名
+     */
+    public static void openAppByPackageName(Context context, String packageName) {
+        if (checkApplication(context, packageName)) {
+            Intent localIntent = new Intent("android.intent.action.MAIN", null);
+            localIntent.addCategory("android.intent.category.LAUNCHER");
+            List<ResolveInfo> appList = context.getPackageManager().queryIntentActivities(localIntent, 0);
+            for (int i = 0; i < appList.size(); i++) {
+                ResolveInfo resolveInfo = appList.get(i);
+                String packageStr = resolveInfo.activityInfo.packageName;
+                String className = resolveInfo.activityInfo.name;
+                if (packageStr.equals(packageName)) {
+                    // 这个就是你想要的那个Activity
+                    ComponentName cn = new ComponentName(packageStr, className);
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setComponent(cn);
+                    context.startActivity(intent);
+                }
+            }
+        } else {
+            Toast.makeText(context, "未安装此应用", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * 卸载指定应用的包名
+     *
+     * @param context     上下文
+     * @param packageName 指定的应用包名
+     */
+    public static void unInstall(Context context, String packageName) {
+        if (checkApplication(context, packageName)) {
+            Uri packageURI = Uri.parse("package:" + packageName);
+            Intent intent = new Intent(Intent.ACTION_DELETE);
+            intent.setData(packageURI);
+            context.startActivity(intent);
+        }
+    }
+
+    /**
+     * 判断该包名的应用是否安装
+     *
+     * @param context     上下文
+     * @param packageName 应用包名
+     * @return 是否安装
+     */
+    public static boolean checkApplication(Context context, String packageName) {
+        if (packageName == null || "".equals(packageName)) {
+            return false;
+        }
+        try {
+            context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 根据PackageInfo获取APP名称
+     */
+    public static String getApplicationLabel(Context context, PackageInfo packageInfo) {
+        if (packageInfo == null) {
+            return null;
+        }
+        PackageManager pm = context.getPackageManager();
+        return packageInfo.applicationInfo.loadLabel(pm).toString();
+    }
+
+    /**
+     * 根据PackageInfo获取APP图标
+     */
+    public static Drawable getApplicationIcon(Context context, PackageInfo packageInfo) {
+        if (packageInfo == null) {
+            return null;
+        }
+        PackageManager pm = context.getPackageManager();
+        return packageInfo.applicationInfo.loadIcon(pm);
+    }
+
+    /**
+     * 根据包名获取APP名称
+     */
+    public static String getApplicationLabel(Context context, String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return null;
+        }
+        PackageManager pm = context.getPackageManager();
+        try {
+            PackageInfo info = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            return info.applicationInfo.loadLabel(pm).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 }

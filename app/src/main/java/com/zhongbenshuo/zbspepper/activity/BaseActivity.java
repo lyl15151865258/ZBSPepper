@@ -23,11 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhongbenshuo.zbspepper.R;
+import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.utils.ActivityController;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
-import com.zhongbenshuo.zbspepper.utils.MyLifecycleHandler;
-import com.zhongbenshuo.zbspepper.utils.NotificationsUtils;
-import com.zhongbenshuo.zbspepper.utils.ToastUtils;
 import com.zhongbenshuo.zbspepper.widget.LoadingDialog;
 
 import org.greenrobot.eventbus.EventBus;
@@ -93,7 +91,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStringEvent(String msg) {
+    public void onStringEvent(EventMsg msg) {
 
     }
 
@@ -188,7 +186,6 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param msg 需要显示的文本
      */
     public void showToast(String msg) {
-        if (NotificationsUtils.isNotificationEnabled(this) && MyLifecycleHandler.isApplicationInForeground()) {
             //如果授予了App系统通知权限，则使用系统Toast
             View view = LayoutInflater.from(this).inflate(R.layout.toast_layout, findViewById(android.R.id.content), false);
             TextView tvMessage = view.findViewById(R.id.mbMessage);
@@ -202,10 +199,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 toast.setDuration(Toast.LENGTH_SHORT);
             }
             toast.show();
-        } else {
-            //否则使用自定义的View（模仿Toast，存在瑕疵）
-            ToastUtils.makeText(this, msg, ToastUtils.LENGTH_SHORT).show();
-        }
     }
 
     public void openActivity(Class<?> pClass) {

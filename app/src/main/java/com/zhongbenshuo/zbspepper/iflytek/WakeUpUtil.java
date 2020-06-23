@@ -14,7 +14,7 @@ import com.iflytek.cloud.WakeuperListener;
 import com.iflytek.cloud.WakeuperResult;
 import com.iflytek.cloud.util.ResourceUtil;
 import com.zhongbenshuo.zbspepper.activity.BaseActivity;
-import com.zhongbenshuo.zbspepper.activity.ChatActivity;
+import com.zhongbenshuo.zbspepper.fragment.ChatFragment;
 import com.zhongbenshuo.zbspepper.constant.Iflytek;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
 
@@ -145,7 +145,7 @@ public class WakeUpUtil {
                         break;
                 }
                 if (wakeupContent != null) {
-                    Intent intent = new Intent(baseActivity, ChatActivity.class);
+                    Intent intent = new Intent(baseActivity, ChatFragment.class);
                     intent.putExtra("wakeupContent", wakeupContent);
                     baseActivity.startActivity(intent);
                 }

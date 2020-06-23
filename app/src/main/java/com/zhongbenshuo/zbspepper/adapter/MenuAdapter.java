@@ -25,7 +25,7 @@ import java.util.List;
  * @version 2017/11/17
  */
 
-public class MenuAdapter extends RecyclerView.Adapter {
+public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder> {
 
     private Context context;
     private List<Menu> list;
@@ -38,7 +38,7 @@ public class MenuAdapter extends RecyclerView.Adapter {
 
     @NotNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NotNull ViewGroup viewGroup, int viewType) {
+    public MenuViewHolder onCreateViewHolder(@NotNull ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_menu, viewGroup, false);
         MenuViewHolder menuViewHolder = new MenuViewHolder(view);
         menuViewHolder.tvMenu = view.findViewById(R.id.tvMenu);
@@ -47,15 +47,21 @@ public class MenuAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(@NotNull RecyclerView.ViewHolder viewHolder, int position) {
-        MenuViewHolder holder = (MenuViewHolder) viewHolder;
+    public void onBindViewHolder(@NotNull MenuViewHolder viewHolder, int position) {
         Menu menu = list.get(position);
-        holder.tvMenu.setText(menu.getMenuText());
+        viewHolder.tvMenu.setText(menu.getMenuText());
         RequestOptions options = new RequestOptions().error(R.drawable.pepper).placeholder(R.drawable.pepper).dontAnimate().circleCrop();
-        Glide.with(context).load(menu.getMenuImg()).apply(options).into(holder.ivMenu);
-        if (mListener != null && menu.isEnable()) {
-            holder.ivMenu.setOnClickListener((v) -> mListener.onItemClick(v, holder.getLayoutPosition()));
+        Glide.with(context).load(menu.getMenuImg()).apply(options).into(viewHolder.ivMenu);
+        if (menu.isSelected()) {
+            viewHolder.itemView.setBackgroundResource(R.color.green_300);
+        } else {
+            viewHolder.itemView.setBackgroundResource(R.color.transparent);
         }
+        viewHolder.itemView.setOnClickListener((v) -> {
+            if (mListener != null) {
+                mListener.onItemClick(viewHolder.itemView, position);
+            }
+        });
     }
 
     @Override
@@ -63,7 +69,7 @@ public class MenuAdapter extends RecyclerView.Adapter {
         return list.size();
     }
 
-    private class MenuViewHolder extends RecyclerView.ViewHolder {
+    static class MenuViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvMenu;
         private ImageView ivMenu;
