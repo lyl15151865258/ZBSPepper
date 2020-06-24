@@ -63,12 +63,13 @@ public class MyApplicationFragment extends BaseFragment {
                 appAdapter.notifyDataSetChanged();
             } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 // 应用被更改
-                type = "应用被更改";
                 appList.clear();
                 appList.addAll(ApkUtils.scanApps(mContext));
                 appAdapter.notifyDataSetChanged();
             }
-            showToast(type);
+            if (type != null) {
+                showToast(type);
+            }
         }
     };
 

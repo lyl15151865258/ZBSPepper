@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -267,6 +268,15 @@ public class MainActivity extends BaseActivity {
         QiSDK.unregister(this, robotLifecycleCallbacks);
         conversationStatusBinder.unbind(false);
         super.onDestroy();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            return true;
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
     }
 
 }

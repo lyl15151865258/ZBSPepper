@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -193,9 +194,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (toast == null) {
                 toast = new Toast(this);
                 toast.setView(view);
+                toast.setGravity(Gravity.BOTTOM, 0, 0);
                 toast.setDuration(Toast.LENGTH_SHORT);
             } else {
                 toast.setView(view);
+                toast.setGravity(Gravity.BOTTOM, 0, 0);
                 toast.setDuration(Toast.LENGTH_SHORT);
             }
             toast.show();

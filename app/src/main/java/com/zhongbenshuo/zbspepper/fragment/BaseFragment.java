@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,6 @@ import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
 import com.zhongbenshuo.zbspepper.widget.LoadingDialog;
 
-import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -232,9 +232,11 @@ public abstract class BaseFragment extends Fragment {
         if (toast == null) {
             toast = new Toast(mContext);
             toast.setView(view);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.setDuration(Toast.LENGTH_SHORT);
         } else {
             toast.setView(view);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.setDuration(Toast.LENGTH_SHORT);
         }
         toast.show();
