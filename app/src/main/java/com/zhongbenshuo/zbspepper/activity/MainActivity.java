@@ -33,6 +33,7 @@ import com.zhongbenshuo.zbspepper.fragment.CompanyProfileFragment;
 import com.zhongbenshuo.zbspepper.fragment.EngineeringCaseFragment;
 import com.zhongbenshuo.zbspepper.fragment.MyApplicationFragment;
 import com.zhongbenshuo.zbspepper.fragment.SelfIntroductionFragment;
+import com.zhongbenshuo.zbspepper.fragment.SettingFragment;
 import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
 import com.zhongbenshuo.zbspepper.widget.NoScrollViewPager;
@@ -69,7 +70,7 @@ public class MainActivity extends BaseActivity {
     private FragmentStatePagerAdapter viewPagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
         @Override
         public int getCount() {
-            return 6;
+            return menuList.size();
         }
 
         @Override
@@ -93,6 +94,9 @@ public class MainActivity extends BaseActivity {
                 //应用页面
                 case 5:
                     return new MyApplicationFragment();
+                //设置页面
+                case 6:
+                    return new SettingFragment();
                 default:
                     break;
             }
@@ -219,8 +223,9 @@ public class MainActivity extends BaseActivity {
         menuList.add(new Menu(R.drawable.company, getString(R.string.CompanyProfile), false));
         menuList.add(new Menu(R.drawable.scope, getString(R.string.BusinessScope), false));
         menuList.add(new Menu(R.drawable.cases, getString(R.string.EngineeringCase), false));
-        menuList.add(new Menu(R.drawable.cases, getString(R.string.ChatPage), false));
-        menuList.add(new Menu(R.drawable.message, getString(R.string.MyApplication), false));
+        menuList.add(new Menu(R.drawable.conversation, getString(R.string.ChatPage), false));
+        menuList.add(new Menu(R.drawable.application, getString(R.string.MyApplication), false));
+        menuList.add(new Menu(R.drawable.setting, getString(R.string.Setting), false));
         menuAdapter = new MenuAdapter(this, menuList);
         menuAdapter.setOnItemClickListener(onItemClickListener);
         rvMenu.setAdapter(menuAdapter);
@@ -230,7 +235,7 @@ public class MainActivity extends BaseActivity {
         viewPager.setNoScroll(true);
         viewPager.setAdapter(viewPagerAdapter);
         //设置Fragment预加载，非常重要,可以保存每个页面fragment已有的信息,防止切换后原页面信息丢失
-        viewPager.setOffscreenPageLimit(6);
+        viewPager.setOffscreenPageLimit(menuList.size());
 
         speechBarView = findViewById(R.id.speech_bar);
         input = findViewById(R.id.input);

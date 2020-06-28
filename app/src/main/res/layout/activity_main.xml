@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_6"
     android:orientation="vertical"
     tools:context=".activity.MainActivity">
 
@@ -93,12 +92,13 @@
         <View
             android:layout_width="@dimen/dp_1"
             android:layout_height="match_parent"
-            android:background="@color/gray_slight" />
+            android:background="@color/gray_1" />
 
         <com.zhongbenshuo.zbspepper.widget.NoScrollViewPager
             android:id="@+id/viewpager"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:background="@drawable/background"
             android:layout_weight="1"
             android:overScrollMode="never" />
 

@@ -34,7 +34,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
     private int mAIUIState = AIUIConstant.STATE_IDLE;
     private String question;
     private String answer;
-    // TTS是否开启需要在讯飞AIUI云端同步配置语音合成下发。
+    // TTS是否开启，需要在讯飞AIUI云端同步配置语音合成下发。
     private boolean useIFlytekTTS = false;
     private SpeechEngine mSpeechEngine;
 
@@ -49,13 +49,11 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         try {
             String params = IOUtils.fromAsset(mContext, "cfg/aiui_phone.cfg");
             params = params.replace("\n", "").replace("\t", "").replace(" ", "");
-            AIUIAgent aIUIAgent = AIUIAgent.createAgent(mContext, params, mAIUIListener);
-            return aIUIAgent;
+            return AIUIAgent.createAgent(mContext, params, mAIUIListener);
         } catch (Exception e) {
             LogUtils.d(TAG, "Error " + e.getMessage());
             return null;
         }
-
     }
 
     @Override
@@ -69,7 +67,6 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         if (aiuiAgent == null) {
             doFallback();
         } else {
-
             sendNlpMessage(aiuiAgent);
             try {
                 countDownLatch.await();
@@ -193,7 +190,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                 } else {
                                     // 通过EventBus发送给UI界面更新对话列表
                                     EventMsg msg = new EventMsg();
-                                    msg.setTag(Constants.REPLY_CLEAR);
+                                    msg.setTag(Constants.REPLY);
                                     msg.setMsg(answer);
                                     EventBus.getDefault().post(msg);
                                 }

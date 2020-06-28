@@ -17,45 +17,49 @@ public class BannerResources {
 
     public static List<?> getCompanyIntroductionResources() {
         List<Integer> imgList = new ArrayList<>();
-        imgList.add(R.drawable.introduction1);
-        imgList.add(R.drawable.introduction4);
-        imgList.add(R.drawable.introduction5);
-        imgList.add(R.drawable.introduction6);
-        imgList.add(R.drawable.introduction9);
-        imgList.add(R.drawable.introduction11);
-        imgList.add(R.drawable.introduction12);
-        imgList.add(R.drawable.introduction13);
-        imgList.add(R.drawable.introduction31);
-        imgList.add(R.drawable.introduction32);
-        imgList.add(R.drawable.introduction33);
-        imgList.add(R.drawable.introduction36);
+        imgList.add(R.drawable.company1);
+        imgList.add(R.drawable.company2);
+        imgList.add(R.drawable.company3);
+        imgList.add(R.drawable.company4);
+        imgList.add(R.drawable.company5);
+        imgList.add(R.drawable.company6);
+        imgList.add(R.drawable.company7);
+        imgList.add(R.drawable.company8);
+        imgList.add(R.drawable.company9);
+        imgList.add(R.drawable.company10);
+        imgList.add(R.drawable.company11);
+        imgList.add(R.drawable.company12);
+        imgList.add(R.drawable.company13);
+        imgList.add(R.drawable.company14);
         return imgList;
     }
 
     public static List<?> getBusinessScopeResources() {
         List<Integer> imgList = new ArrayList<>();
-        imgList.add(R.drawable.introduction7);
-        imgList.add(R.drawable.introduction8);
+        imgList.add(R.drawable.business1);
+        imgList.add(R.drawable.business2);
         return imgList;
     }
 
     public static List<?> getEngineeringCaseResources() {
         List<Integer> imgList = new ArrayList<>();
-        imgList.add(R.drawable.introduction15);
-        imgList.add(R.drawable.introduction16);
-        imgList.add(R.drawable.introduction17);
-        imgList.add(R.drawable.introduction18);
-        imgList.add(R.drawable.introduction19);
-        imgList.add(R.drawable.introduction20);
-        imgList.add(R.drawable.introduction21);
-        imgList.add(R.drawable.introduction22);
-        imgList.add(R.drawable.introduction23);
-        imgList.add(R.drawable.introduction24);
-        imgList.add(R.drawable.introduction25);
-        imgList.add(R.drawable.introduction26);
-        imgList.add(R.drawable.introduction27);
-        imgList.add(R.drawable.introduction28);
-        imgList.add(R.drawable.introduction29);
+        imgList.add(R.drawable.project1);
+        imgList.add(R.drawable.project2);
+        imgList.add(R.drawable.project3);
+        imgList.add(R.drawable.project4);
+        imgList.add(R.drawable.project5);
+        imgList.add(R.drawable.project6);
+        imgList.add(R.drawable.project7);
+        imgList.add(R.drawable.project8);
+        imgList.add(R.drawable.project9);
+        imgList.add(R.drawable.project10);
+        imgList.add(R.drawable.project11);
+        imgList.add(R.drawable.project12);
+        imgList.add(R.drawable.project13);
+        imgList.add(R.drawable.project14);
+        imgList.add(R.drawable.project15);
+        imgList.add(R.drawable.project16);
+        imgList.add(R.drawable.project17);
         return imgList;
     }
 

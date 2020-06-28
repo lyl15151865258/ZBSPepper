@@ -20,9 +20,10 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (ACTION.equals(intent.getAction())) {
-            Intent mainActivityIntent = new Intent(context, LogoActivity.class);  // 要启动的Activity
-            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(mainActivityIntent);
+            // 由于已经把应用设置为Launcher了，因此不需要再设置开机启动了
+//            Intent mainActivityIntent = new Intent(context, LogoActivity.class);  // 要启动的Activity
+//            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            context.startActivity(mainActivityIntent);
         }
     }
 }

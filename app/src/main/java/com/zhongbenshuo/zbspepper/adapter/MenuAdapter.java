@@ -50,10 +50,10 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     public void onBindViewHolder(@NotNull MenuViewHolder viewHolder, int position) {
         Menu menu = list.get(position);
         viewHolder.tvMenu.setText(menu.getMenuText());
-        RequestOptions options = new RequestOptions().error(R.drawable.pepper).placeholder(R.drawable.pepper).dontAnimate().circleCrop();
+        RequestOptions options = new RequestOptions().error(R.drawable.pepper).placeholder(R.drawable.pepper).dontAnimate();
         Glide.with(context).load(menu.getMenuImg()).apply(options).into(viewHolder.ivMenu);
         if (menu.isSelected()) {
-            viewHolder.itemView.setBackgroundResource(R.color.green_300);
+            viewHolder.itemView.setBackgroundResource(R.color.color_blue);
         } else {
             viewHolder.itemView.setBackgroundResource(R.color.transparent);
         }

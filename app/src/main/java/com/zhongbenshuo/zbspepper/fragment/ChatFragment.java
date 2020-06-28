@@ -89,13 +89,9 @@ public class ChatFragment extends BaseFragment {
                 // 听到的内容
                 chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.LISTEN, msg.getMsg()));
                 break;
-            case Constants.REPLY_CLEAR:
+            case Constants.REPLY:
                 // 听清的回复
                 chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.REPLY_CLEAR, msg.getMsg()));
-                break;
-            case Constants.REPLY_BLURRY:
-                // 听不清的回复
-                chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.REPLY_BLURRY, msg.getMsg()));
                 break;
             default:
                 break;

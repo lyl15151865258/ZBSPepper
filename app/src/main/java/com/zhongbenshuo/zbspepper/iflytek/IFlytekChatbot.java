@@ -52,11 +52,6 @@ public class IFlytekChatbot extends BaseChatbot {
         Log.d(TAG, "answer empty: ");
         // pepper 没有听到时兜底语音。
         DirectSayReaction directSayReac = new DirectSayReaction(qiContent, qiContent.getResources().getString(R.string.fallback_answer));
-        // 通过EventBus发送给UI界面更新对话列表
-        EventMsg msg = new EventMsg();
-        msg.setTag(Constants.REPLY_BLURRY);
-        msg.setMsg(qiContent.getResources().getString(R.string.fallback_answer));
-        EventBus.getDefault().post(msg);
         return new StandardReplyReaction(directSayReac, ReplyPriority.FALLBACK);
     }
 

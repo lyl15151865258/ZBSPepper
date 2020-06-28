@@ -29,7 +29,6 @@ public class Constants {
      * EventBus标记
      */
     public static final String LISTEN = "LISTEN";
-    public static final String REPLY_BLURRY = "REPLY_BLURRY";
-    public static final String REPLY_CLEAR = "REPLY_CLEAR";
+    public static final String REPLY = "REPLY";
     public static final String EXIT = "EXIT";
 }
