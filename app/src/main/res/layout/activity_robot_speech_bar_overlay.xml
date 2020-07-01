@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.aldebaran.qi.sdk.design.speechbar.SpeechBarView
+    <com.zhongbenshuo.zbspepper.design.speechbar.SpeechBarView
         android:id="@+id/speech_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

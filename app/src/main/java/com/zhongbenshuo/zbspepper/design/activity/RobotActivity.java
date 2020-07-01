@@ -4,7 +4,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -14,13 +13,14 @@ import com.aldebaran.qi.sdk.QiContext;
 import com.aldebaran.qi.sdk.QiSDK;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
 import com.zhongbenshuo.zbspepper.R;
+import com.zhongbenshuo.zbspepper.activity.BaseActivity;
 import com.zhongbenshuo.zbspepper.design.activity.conversationstatus.ConversationStatusBinder;
 import com.zhongbenshuo.zbspepper.design.activity.conversationstatus.SpeechBarDisplayStrategy;
 import com.zhongbenshuo.zbspepper.design.activity.utils.KeyboardVisibilityWatcher;
 import com.zhongbenshuo.zbspepper.design.activity.utils.ScreenFlagsChecker;
 import com.zhongbenshuo.zbspepper.design.speechbar.SpeechBarView;
 
-public abstract class RobotActivity extends AppCompatActivity {
+public abstract class RobotActivity extends BaseActivity {
 
     private final ConversationStatusBinder conversationStatusBinder = new ConversationStatusBinder();
     private FrameLayout frameLayout;

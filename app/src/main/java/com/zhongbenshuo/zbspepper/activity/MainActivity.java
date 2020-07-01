@@ -1,6 +1,7 @@
 package com.zhongbenshuo.zbspepper.activity;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.aldebaran.qi.Future;
@@ -25,16 +27,20 @@ import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.adapter.MenuAdapter;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.bean.Menu;
+import com.zhongbenshuo.zbspepper.constant.Iflytek;
 import com.zhongbenshuo.zbspepper.design.activity.conversationstatus.ConversationStatusBinder;
+import com.zhongbenshuo.zbspepper.design.activity.utils.KeyboardVisibilityWatcher;
+import com.zhongbenshuo.zbspepper.design.activity.utils.ScreenFlagsChecker;
 import com.zhongbenshuo.zbspepper.design.speechbar.SpeechBarView;
+import com.zhongbenshuo.zbspepper.fragment.ApplicationFragment;
 import com.zhongbenshuo.zbspepper.fragment.BusinessScopeFragment;
 import com.zhongbenshuo.zbspepper.fragment.ChatFragment;
 import com.zhongbenshuo.zbspepper.fragment.CompanyProfileFragment;
 import com.zhongbenshuo.zbspepper.fragment.EngineeringCaseFragment;
-import com.zhongbenshuo.zbspepper.fragment.MyApplicationFragment;
 import com.zhongbenshuo.zbspepper.fragment.SelfIntroductionFragment;
 import com.zhongbenshuo.zbspepper.fragment.SettingFragment;
 import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
+import com.zhongbenshuo.zbspepper.utils.GsonUtils;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
 import com.zhongbenshuo.zbspepper.widget.NoScrollViewPager;
 
@@ -45,6 +51,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 主页面
@@ -58,6 +66,7 @@ public class MainActivity extends BaseActivity {
 
     private Context mContext;
     private final ConversationStatusBinder conversationStatusBinder = new ConversationStatusBinder();
+    private KeyboardVisibilityWatcher keyboardVisibilityWatcher = new KeyboardVisibilityWatcher();
     private List<Menu> menuList;
     private RecyclerView rvMenu;
     private MenuAdapter menuAdapter;
@@ -66,6 +75,7 @@ public class MainActivity extends BaseActivity {
     private SpeechBarView speechBarView;
     private boolean isChat = false;
     private Chat mChat;
+    private Future<Void> chatFuture;
     private Say mSay;
     private FragmentStatePagerAdapter viewPagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
         @Override
@@ -93,7 +103,7 @@ public class MainActivity extends BaseActivity {
                     return new ChatFragment();
                 //应用页面
                 case 5:
-                    return new MyApplicationFragment();
+                    return new ApplicationFragment();
                 //设置页面
                 case 6:
                     return new SettingFragment();
@@ -144,25 +154,57 @@ public class MainActivity extends BaseActivity {
             conversationStatusBinder.bind(qiContext, speechBarView);
 
             Touch touch = qiContext.getTouch();
-
             // 头部传感器
             TouchSensor touchSensor = touch.getSensor("Head/Touch");
             touchSensor.addOnStateChangedListener(touchState -> {
                 LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
                 if (touchState.getTouched()) {
-                    Say mSay = SayBuilder.with(qiContext)
+                    LogUtils.d(TAG, "触摸了头部传感器");
+                    mSay = SayBuilder.with(qiContext)
                             .withText("摸我的头，我会容易睡着哒")
                             .build();
-                    mSay.run();
+                    Future<Void> fSay = mSay.async().run();
+                    try {
+                        fSay.get();
+                    } catch (ExecutionException e) {
+                        LogUtils.d(TAG, e);
+                    } catch (CancellationException e) {
+                        LogUtils.d(TAG, "Interruption during Say");
+                    }
                 }
             });
+            // 手部传感器
+            TouchSensor leftHandSensor = touch.getSensor("LHand/Touch");
+            TouchSensor rightHandSensor = touch.getSensor("RHand/Touch");
+            TouchSensor.OnStateChangedListener onStateChangedListenerHand = touchState -> {
+                LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
+                if (touchState.getTouched()) {
+                    LogUtils.d(TAG, "触摸了手部传感器");
+                }
+            };
+            leftHandSensor.addOnStateChangedListener(onStateChangedListenerHand);
+            rightHandSensor.addOnStateChangedListener(onStateChangedListenerHand);
+            // 底部传感器
+            TouchSensor bumperSensorBack = touch.getSensor("Bumper/Back");
+            TouchSensor bumperSensorLeft = touch.getSensor("Bumper/FrontLeft");
+            TouchSensor bumperSensorRight = touch.getSensor("Bumper/FrontRight");
+            TouchSensor.OnStateChangedListener onStateChangedListenerBumper = touchState -> {
+                LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
+                if (touchState.getTouched()) {
+                    LogUtils.d(TAG, "触摸了底部传感器");
+                }
+            };
+            bumperSensorBack.addOnStateChangedListener(onStateChangedListenerBumper);
+            bumperSensorLeft.addOnStateChangedListener(onStateChangedListenerBumper);
+            bumperSensorRight.addOnStateChangedListener(onStateChangedListenerBumper);
 
             // 讯飞AIUI平台APPID和APPKEY
             Map<String, String> myAsrParams = new HashMap<>(2);
-            String myJson;
-            myJson = "{\"appid\":\"5ee96c8d\",\"headid\": \"AP990396A08Y76100013\",\"key\": \"1527905efb15923a4a59cbcea1ba3c54\"}";
-            myAsrParams.put("iflytek", myJson);
-
+            Map<String, String> params = new HashMap<>(2);
+            params.put("appid", Iflytek.APP_ID);
+            params.put("key", Iflytek.APP_KEY);
+//            params.put("headid", Iflytek.HEAD_ID);
+            myAsrParams.put("iflytek", GsonUtils.convertJSON(params));
 
             mSay = SayBuilder.with(qiContext)
                     .withText(getResources().getString(R.string.greeting))
@@ -178,7 +220,7 @@ public class MainActivity extends BaseActivity {
                         .withAsrDriverParameters(myAsrParams)
                         .build();
 
-                Future<Void> chatFuture = mChat.async().run();
+                chatFuture = mChat.async().run();
 
                 chatFuture.thenConsume(future -> {
                     if (future.hasError()) {
@@ -199,6 +241,9 @@ public class MainActivity extends BaseActivity {
             // 失去焦点
             LogUtils.d(TAG, "失去焦点");
             conversationStatusBinder.unbind(false);
+            if (chatFuture != null) {
+                chatFuture.requestCancellation();
+            }
         }
 
         @Override
@@ -260,18 +305,22 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
+//        conversationStatusBinder.init(constraintLayout, speechBarView);
+        keyboardVisibilityWatcher.subscribe(this::hideSystemBars, this);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
+        keyboardVisibilityWatcher.release();
+        conversationStatusBinder.unbind(true);
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         QiSDK.unregister(this, robotLifecycleCallbacks);
-        conversationStatusBinder.unbind(false);
+        conversationStatusBinder.unbind(true);
         super.onDestroy();
     }
 
@@ -282,6 +331,41 @@ public class MainActivity extends BaseActivity {
         } else {
             return super.dispatchKeyEvent(event);
         }
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        hideSystemBars();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+
+        hideSystemBars();
+    }
+
+    private void hideSystemBars() {
+        if (new ScreenFlagsChecker().hasFlags(getWindow().getDecorView().getSystemUiVisibility(),
+                View.SYSTEM_UI_FLAG_FULLSCREEN,
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)) {
+            return;
+        }
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
 }

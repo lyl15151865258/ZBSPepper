@@ -1,5 +1,7 @@
 package com.zhongbenshuo.zbspepper.utils;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -420,20 +422,46 @@ public class ApkUtils {
     /**
      * 查询手机内所有的应用
      */
-    public static List<AppInfo> scanApps(Context context) {
+    public static List<AppInfo> scanApps(Context mContext) {
         List<AppInfo> appInfoList = new ArrayList<>();
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PackageManager pManager = context.getPackageManager();
+        PackageManager pManager = mContext.getPackageManager();
         List<ResolveInfo> appList = pManager.queryIntentActivities(intent, 0);
         for (ResolveInfo info : appList) {
-            String appName = info.loadLabel(context.getPackageManager()).toString();
-            Drawable appIcon = info.loadIcon(context.getPackageManager());
+            String appName = info.loadLabel(mContext.getPackageManager()).toString();
+            Drawable appIcon = info.loadIcon(mContext.getPackageManager());
             String packageName = info.activityInfo.packageName;
-            appInfoList.add(new AppInfo(appName, appIcon, packageName));
+            // 不显示本应用自身，以防被卸载
+            if (!packageName.equals("com.zhongbenshuo.zbspepper")){
+                appInfoList.add(new AppInfo(appName, appIcon, packageName));
+            }
         }
         LogUtils.d("ApkUtils", "本次扫描到" + appInfoList.size() + "个应用");
         return appInfoList;
+    }
+
+    /**
+     * 获取当前应用名称
+     *
+     * @param context
+     * @return
+     */
+    public static String getAppName(Context context) {
+        String appName;
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            //CharSequence这两者效果是一样的.
+            appName = packageManager.getApplicationLabel(applicationInfo).toString();
+//            appName = (String) packageManager.getApplicationLabel(applicationInfo);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtils.d("GsonUtils", "Exception=" + e.toString());
+            return null;
+        }
+        return appName;
     }
 
     /**

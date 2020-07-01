@@ -29,6 +29,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 public class IFlytekNlpReaction extends BaseChatbotReaction {
+
     private static String TAG = IFlytekNlpReaction.class.getSimpleName();
     private Context mContext;
     private int mAIUIState = AIUIConstant.STATE_IDLE;
@@ -80,7 +81,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                             .withText(answers)
                             .build();
 
-                    Future fSay = say.async().run();
+                    Future<Void> fSay = say.async().run();
 
                     try {
                         fSay.get();
