@@ -7,9 +7,10 @@ import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.PathEffect;
-import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.WindowManager;
+
+import androidx.appcompat.widget.AppCompatEditText;
 
 import static android.content.Context.WINDOW_SERVICE;
 

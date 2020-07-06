@@ -1,7 +1,7 @@
 package com.zhongbenshuo.zbspepper.interfaces;
 
-import android.support.annotation.ArrayRes;
-import android.support.annotation.StringRes;
+import androidx.annotation.ArrayRes;
+import androidx.annotation.StringRes;
 
 /**
  * 自动切换语言的View的方法接口

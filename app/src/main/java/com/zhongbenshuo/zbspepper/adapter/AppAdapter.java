@@ -1,12 +1,13 @@
 package com.zhongbenshuo.zbspepper.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.bean.AppInfo;
@@ -16,11 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * 菜单网格的适配器
- * Created by LiYuliang on 2017/09/07 0007.
+ * 应用适配器
+ * Created at 2020/7/6 0006 11:15
  *
- * @author LiYuliang
- * @version 2017/11/17
+ * @author : LiYuliang
+ * @version : 2020/7/6 0006 11:15
  */
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {

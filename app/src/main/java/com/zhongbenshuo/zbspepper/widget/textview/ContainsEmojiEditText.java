@@ -1,12 +1,13 @@
 package com.zhongbenshuo.zbspepper.widget.textview;
 
 import android.content.Context;
-import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+
+import androidx.appcompat.widget.AppCompatEditText;
 
 public class ContainsEmojiEditText extends AppCompatEditText {
     //输入表情前的光标位置

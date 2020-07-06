@@ -2,7 +2,8 @@ package com.zhongbenshuo.zbspepper.utils;
 
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.support.v4.view.animation.LinearOutSlowInInterpolator;
+
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import com.zhongbenshuo.zbspepper.widget.WaveView;
 

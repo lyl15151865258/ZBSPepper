@@ -5,12 +5,25 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import java.util.Map;
 import java.util.Set;
 
-import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.*;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.CURSOR_COLUMN_NAME;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.CURSOR_COLUMN_TYPE;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.CURSOR_COLUMN_VALUE;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.SEPARATOR;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_BOOLEAN;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_CLEAN;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_CONTAIN;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_FLOAT;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_GET_ALL;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_INT;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_LONG;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.TYPE_STRING;
+import static com.zhongbenshuo.zbspepper.contentprovider.ConstantUtil.VALUE;
 
 /**
  * 利用ContentProvider封装的SharedPreferences跨进程数据共享

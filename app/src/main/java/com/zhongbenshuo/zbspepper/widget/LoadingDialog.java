@@ -2,10 +2,11 @@ package com.zhongbenshuo.zbspepper.widget;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.zhongbenshuo.zbspepper.R;
 

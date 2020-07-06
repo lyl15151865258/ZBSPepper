@@ -1,10 +1,11 @@
 package com.zhongbenshuo.zbspepper.widget.textview;
 
 import android.content.Context;
-import android.support.annotation.ArrayRes;
-import android.support.annotation.StringRes;
-import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+
+import androidx.annotation.ArrayRes;
+import androidx.annotation.StringRes;
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.zhongbenshuo.zbspepper.interfaces.LanguageChangeableView;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;

@@ -1,11 +1,12 @@
 package com.zhongbenshuo.zbspepper.design.activity.conversationstatus;
 
-import android.support.annotation.UiThread;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.transition.AutoTransition;
 import android.transition.Transition;
 import android.transition.TransitionManager;
+
+import androidx.annotation.UiThread;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.aldebaran.qi.Future;
 import com.aldebaran.qi.sdk.QiContext;

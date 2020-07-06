@@ -4,14 +4,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.aldebaran.qi.Future;
 import com.aldebaran.qi.sdk.QiContext;
@@ -27,6 +28,7 @@ import com.aldebaran.qi.sdk.object.holder.Holder;
 import com.aldebaran.qi.sdk.object.touch.Touch;
 import com.aldebaran.qi.sdk.object.touch.TouchSensor;
 import com.zhongbenshuo.zbspepper.R;
+import com.zhongbenshuo.zbspepper.adapter.FragmentAdapter;
 import com.zhongbenshuo.zbspepper.adapter.MenuAdapter;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.bean.Menu;
@@ -45,7 +47,6 @@ import com.zhongbenshuo.zbspepper.fragment.SettingFragment;
 import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
 import com.zhongbenshuo.zbspepper.utils.GsonUtils;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
-import com.zhongbenshuo.zbspepper.widget.NoScrollViewPager;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -72,49 +73,13 @@ public class MainActivity extends BaseActivity {
     private KeyboardVisibilityWatcher keyboardVisibilityWatcher = new KeyboardVisibilityWatcher();
     private List<Menu> menuList;
     private MenuAdapter menuAdapter;
-    private NoScrollViewPager viewPager;
+    private ViewPager2 viewPager;
     private ImageView input;
     private SpeechBarView speechBarView;
     private boolean isChat = false;
     private Chat mChat;
     private Future<Void> chatFuture;
     private Say mSay;
-    private FragmentStatePagerAdapter viewPagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
-        @Override
-        public int getCount() {
-            return menuList.size();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                //自我介绍
-                case 0:
-                    return new SelfIntroductionFragment();
-                //公司简介
-                case 1:
-                    return new CompanyProfileFragment();
-                //经营范围
-                case 2:
-                    return new BusinessScopeFragment();
-                //工程案例
-                case 3:
-                    return new EngineeringCaseFragment();
-                //聊天问答
-                case 4:
-                    return new ChatFragment();
-                //应用页面
-                case 5:
-                    return new ApplicationFragment();
-                //设置页面
-                case 6:
-                    return new SettingFragment();
-                default:
-                    break;
-            }
-            return null;
-        }
-    };
 
     private View.OnClickListener onClickListener = (v) -> {
         switch (v.getId()) {
@@ -288,9 +253,18 @@ public class MainActivity extends BaseActivity {
 
         viewPager = findViewById(R.id.viewpager);
         // 不允许滑动ViewPager
-        viewPager.setNoScroll(true);
-        viewPager.setAdapter(viewPagerAdapter);
-        //设置Fragment预加载，非常重要,可以保存每个页面fragment已有的信息,防止切换后原页面信息丢失
+        viewPager.setUserInputEnabled(false);
+
+        List<Fragment> fragments = new ArrayList<>();
+        fragments.add(new SelfIntroductionFragment());
+        fragments.add(new CompanyProfileFragment());
+        fragments.add(new BusinessScopeFragment());
+        fragments.add(new EngineeringCaseFragment());
+        fragments.add(new ChatFragment());
+        fragments.add(new ApplicationFragment());
+        fragments.add(new SettingFragment());
+        FragmentAdapter fragmentAdapter = new FragmentAdapter(this, fragments);
+        viewPager.setAdapter(fragmentAdapter);
         viewPager.setOffscreenPageLimit(menuList.size());
 
         speechBarView = findViewById(R.id.speech_bar);
