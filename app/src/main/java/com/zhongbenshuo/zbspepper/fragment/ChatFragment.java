@@ -15,6 +15,7 @@ import com.zhongbenshuo.zbspepper.adapter.ChatAdapter;
 import com.zhongbenshuo.zbspepper.bean.ChatText;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.constant.Constants;
+import com.zhongbenshuo.zbspepper.utils.TimeUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -22,7 +23,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 聊天对话页面
+ * 聊天问答
  * Created at 2020/1/7 0007 23:32
  *
  * @author : LiYuliang
@@ -87,11 +88,11 @@ public class ChatFragment extends BaseFragment {
         switch (msg.getTag()) {
             case Constants.LISTEN:
                 // 听到的内容
-                chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.LISTEN, msg.getMsg()));
+                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.LISTEN, msg.getMsg()));
                 break;
             case Constants.REPLY:
                 // 听清的回复
-                chatAdapter.insertData(new ChatText(ChatText.CHATTYPE.REPLY_CLEAR, msg.getMsg()));
+                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.REPLY_CLEAR, msg.getMsg()));
                 break;
             default:
                 break;

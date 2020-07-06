@@ -17,8 +17,18 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
+            versionNameSuffix "_debug"
             minifyEnabled false
+            zipAlignEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            versionNameSuffix "_release"
+            minifyEnabled false
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -1,5 +1,7 @@
 package com.zhongbenshuo.zbspepper;
 
+import com.zhongbenshuo.zbspepper.utils.TimeUtils;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -12,6 +14,8 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+        long time = TimeUtils.getCurrentTimeMillis();
+        System.out.println(time);
+        System.out.println(TimeUtils.timeMillis2String(time));
     }
 }

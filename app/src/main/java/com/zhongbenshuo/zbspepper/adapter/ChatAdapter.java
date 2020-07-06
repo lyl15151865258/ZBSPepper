@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.bean.ChatText;
+import com.zhongbenshuo.zbspepper.utils.TimeUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +39,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NotNull ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_chat, viewGroup, false);
         ChatViewHolder chatViewHolder = new ChatViewHolder(view);
+        chatViewHolder.tvTime = view.findViewById(R.id.tvTime);
         chatViewHolder.txtLeft = view.findViewById(R.id.txtLeft);
         chatViewHolder.txtRight = view.findViewById(R.id.txtRight);
         chatViewHolder.txtLeftDown = view.findViewById(R.id.txtLeft_down);
@@ -50,6 +52,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NotNull RecyclerView.ViewHolder viewHolder, int position) {
         ChatViewHolder chatViewHolder = (ChatViewHolder) viewHolder;
         ChatText chatText = list.get(position);
+        // 显示时间
+        if (position == 0) {
+            // 第一条显示时间
+            chatViewHolder.tvTime.setText(TimeUtils.handleDate(chatText.getTime()));
+            chatViewHolder.tvTime.setVisibility(View.VISIBLE);
+        } else {
+            // 不是第一条就和上一条比较，如果时间间隔大于5分钟，则显示新的时间
+            if (chatText.getTime() - list.get(position - 1).getTime() > 1000 * 60 * 5) {
+                chatViewHolder.tvTime.setText(TimeUtils.handleDate(chatText.getTime()));
+                chatViewHolder.tvTime.setVisibility(View.VISIBLE);
+            } else {
+                chatViewHolder.tvTime.setVisibility(View.GONE);
+            }
+        }
+        // 内容显示
         String content = chatText.getChatContent();
         switch (chatText.getChatType()) {
             case REPLY_CLEAR:
@@ -83,9 +100,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return list.size();
     }
 
-    private class ChatViewHolder extends RecyclerView.ViewHolder {
+    private static class ChatViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView txtLeft, txtRight, txtLeftDown;
+        private TextView tvTime, txtLeft, txtRight, txtLeftDown;
         private LinearLayout linearLeft, linearRight;
 
         private ChatViewHolder(View itemView) {

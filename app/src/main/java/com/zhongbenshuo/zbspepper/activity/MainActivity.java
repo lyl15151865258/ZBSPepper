@@ -18,9 +18,12 @@ import com.aldebaran.qi.sdk.QiContext;
 import com.aldebaran.qi.sdk.QiSDK;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
 import com.aldebaran.qi.sdk.builder.ChatBuilder;
+import com.aldebaran.qi.sdk.builder.HolderBuilder;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
 import com.aldebaran.qi.sdk.object.conversation.Chat;
 import com.aldebaran.qi.sdk.object.conversation.Say;
+import com.aldebaran.qi.sdk.object.holder.AutonomousAbilitiesType;
+import com.aldebaran.qi.sdk.object.holder.Holder;
 import com.aldebaran.qi.sdk.object.touch.Touch;
 import com.aldebaran.qi.sdk.object.touch.TouchSensor;
 import com.zhongbenshuo.zbspepper.R;
@@ -68,7 +71,6 @@ public class MainActivity extends BaseActivity {
     private final ConversationStatusBinder conversationStatusBinder = new ConversationStatusBinder();
     private KeyboardVisibilityWatcher keyboardVisibilityWatcher = new KeyboardVisibilityWatcher();
     private List<Menu> menuList;
-    private RecyclerView rvMenu;
     private MenuAdapter menuAdapter;
     private NoScrollViewPager viewPager;
     private ImageView input;
@@ -98,7 +100,7 @@ public class MainActivity extends BaseActivity {
                 //工程案例
                 case 3:
                     return new EngineeringCaseFragment();
-                //对话页面
+                //聊天问答
                 case 4:
                     return new ChatFragment();
                 //应用页面
@@ -150,6 +152,15 @@ public class MainActivity extends BaseActivity {
         public void onRobotFocusGained(QiContext qiContext) {
             // 获得焦点
             LogUtils.d(TAG, "获取到焦点");
+
+            // 停止自主活动
+            Holder holder = HolderBuilder.with(qiContext)
+                    .withAutonomousAbilities(AutonomousAbilitiesType.BACKGROUND_MOVEMENT)
+                    .build();
+            // 异步的调用方式来停止自主能力。
+            holder.async().hold();
+            // 异步的调用方式来释放自主能力。
+//            holder.async().release();
 
             conversationStatusBinder.bind(qiContext, speechBarView);
 
@@ -258,7 +269,7 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
-        rvMenu = findViewById(R.id.rvMenu);
+        RecyclerView rvMenu = findViewById(R.id.rvMenu);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rvMenu.setLayoutManager(linearLayoutManager);

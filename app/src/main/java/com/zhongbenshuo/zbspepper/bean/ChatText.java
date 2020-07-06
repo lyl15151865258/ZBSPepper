@@ -17,16 +17,28 @@ public class ChatText {
         LISTEN
     }
 
-    public ChatText(CHATTYPE chatType, String chatContent) {
-        this.chatType = chatType;
-        this.chatContent = chatContent;
-    }
+    // 对话时间
+    private long time;
 
     // 聊天内容类型
     private CHATTYPE chatType;
 
     // 聊天内容文本
     private String chatContent;
+
+    public ChatText(long time, CHATTYPE chatType, String chatContent) {
+        this.time = time;
+        this.chatType = chatType;
+        this.chatContent = chatContent;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 
     public CHATTYPE getChatType() {
         return chatType;

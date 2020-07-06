@@ -66,8 +66,56 @@ public class TimeUtils {
      *
      * @return 当前时间（毫秒值）
      */
-    public static String getCurrentTimeMillis() {
-        return String.valueOf(System.currentTimeMillis());
+    public static long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    /**
+     * 毫秒值转String型时间
+     *
+     * @param millSec 毫秒值
+     * @return String型时间
+     */
+    public static String timeMillis2String(long millSec) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA);
+        Date date = new Date(millSec);
+        return sdf.format(date);
+    }
+
+    public static String handleDate(long time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        Date date = new Date(time);
+        Date old;
+        Date now;
+        try {
+            old = sdf.parse(sdf.format(date));
+            now = sdf.parse(sdf.format(new Date()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "";
+        }
+        if (old != null && now != null) {
+            long oldTime = old.getTime();
+            long nowTime = now.getTime();
+
+            long day = (nowTime - oldTime) / (24 * 60 * 60 * 1000);
+
+            if (day < 1) {
+                //今天
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CHINA);
+                return format.format(date);
+            } else if (day == 1) {
+                //昨天
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CHINA);
+                return "昨天 " + format.format(date);
+            } else {
+                //可依次类推
+                SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA);
+                return format.format(date);
+            }
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -77,7 +125,7 @@ public class TimeUtils {
      * @return String型时间
      */
     public static String unixTime2String(long millSec) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         Date date = new Date(millSec * 1000);
         return sdf.format(date);
     }
@@ -144,6 +192,15 @@ public class TimeUtils {
      */
     public static String getCurrentFormatDateTime() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
+        Date curDate = new Date(System.currentTimeMillis());
+        return formatter.format(curDate);
+    }
+
+    /**
+     * 得到系统当前时间，自定义格式化
+     */
+    public static String getFormatTime(String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.CHINA);
         Date curDate = new Date(System.currentTimeMillis());
         return formatter.format(curDate);
     }
