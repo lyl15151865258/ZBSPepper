@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.bean.ChatText;
+import com.zhongbenshuo.zbspepper.utils.LogUtils;
 import com.zhongbenshuo.zbspepper.utils.TimeUtils;
 
 import org.jetbrains.annotations.NotNull;
@@ -114,6 +115,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void insertData(ChatText chatText) {
         list.add(chatText);
         notifyItemInserted(getItemCount() - 1);
+        LogUtils.d("ChatAdapter", "当前一共" + list.size() + "条，" + "滚动到第" + (getItemCount() - 1) + "条");
+        LogUtils.d("ChatAdapter", "列表高度：" + rvChat.getHeight());
         rvChat.scrollToPosition(getItemCount() - 1);
     }
 
