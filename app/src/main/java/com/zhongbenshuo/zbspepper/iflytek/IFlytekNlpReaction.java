@@ -159,7 +159,8 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     break;
                 case AIUIConstant.EVENT_RESULT:
                     // 结果解析事件
-                    LogUtils.d(TAG, "结果解析事件");
+                    LogUtils.d(TAG, "讯飞返回类型：" + event.eventType);
+                    LogUtils.d(TAG, "讯飞返回原文：" + event.info);
                     try {
                         JSONObject data = new JSONObject(event.info).getJSONArray("data").getJSONObject(0);
                         String sub = data.getJSONObject("params").optString("sub");

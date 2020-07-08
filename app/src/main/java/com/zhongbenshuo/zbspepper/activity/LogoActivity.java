@@ -3,6 +3,7 @@ package com.zhongbenshuo.zbspepper.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.KeyEvent;
@@ -87,7 +88,7 @@ public class LogoActivity extends BaseActivity {
     private void checkPermission() {
         if (PermissionUtil.isNeedRequestPermission(this)) {
             showRequestPermissionDialog();
-        } else if (!Settings.System.canWrite(this)) {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {
             showToWriteSettings();
         } else {
             getRSAPublicKey();
@@ -123,7 +124,7 @@ public class LogoActivity extends BaseActivity {
         if (PermissionUtil.isNeedRequestPermission(this)) {
             // 权限被拒绝，提示用户到设置页面授予权限（防止用户点击了“不再提示”后，无法通过弹窗申请权限）
             showToSettings();
-        } else if (!Settings.System.canWrite(this)) {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {
             showToWriteSettings();
         } else {
             getRSAPublicKey();
@@ -189,7 +190,7 @@ public class LogoActivity extends BaseActivity {
             }
         } else if (requestCode == 600) {
             //Settings.System.canWrite方法检测授权结果
-            if (!Settings.System.canWrite(this)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {
                 showRequestPermissionDialog();
             } else {
                 getRSAPublicKey();

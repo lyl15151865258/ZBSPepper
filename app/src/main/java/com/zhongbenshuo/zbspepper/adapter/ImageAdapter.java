@@ -36,9 +36,7 @@ public class ImageAdapter extends BannerAdapter<DataBean, ImageAdapter.ImageHold
     public ImageHolder onCreateHolder(ViewGroup parent, int viewType) {
         ImageView imageView = new ImageView(parent.getContext());
         //注意，必须设置为match_parent，这个是viewpager2强制要求的
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         imageView.setLayoutParams(params);
         imageView.setScaleType(ImageView.ScaleType.FIT_XY);
         return new ImageHolder(imageView);

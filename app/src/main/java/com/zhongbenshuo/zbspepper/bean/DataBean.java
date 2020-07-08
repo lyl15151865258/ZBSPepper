@@ -69,7 +69,6 @@ public class DataBean {
         list.add(new DataBean(R.drawable.project14, null, 1));
         list.add(new DataBean(R.drawable.project15, null, 1));
         list.add(new DataBean(R.drawable.project16, null, 1));
-        list.add(new DataBean(R.drawable.project17, null, 1));
         return list;
     }
 

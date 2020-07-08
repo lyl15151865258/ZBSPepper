@@ -73,7 +73,6 @@ public class ChatFragment extends BaseFragment {
         chatAdapter = new ChatAdapter(rvChat);
         rvChat.setAdapter(chatAdapter);
 
-
         EventBus.getDefault().register(this);
 
         return view;
