@@ -35,13 +35,11 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
 
     public SpeechBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
         init();
     }
 
     public SpeechBarView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
         init();
     }
 
@@ -69,13 +67,11 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
 
         speechBarStateMachine.setOnStateChangedListener(this::onSpeechStateChanged);
 
-        backgroundColorManager.showNotListening(0);
+        backgroundColorManager.showNotListening();
         textAnimationManager.clearText();
 
         onSpeechStateChanged(NOT_LISTENING_NO_SOUND, null);
     }
-
-    //region Public IDiscussBarView API
 
     @Override
     public void clearHeardText() {
@@ -138,41 +134,32 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
     private void onSpeechStateChanged(SpeechBarState state, String data) {
         switch (state) {
             case NOT_LISTENING_NO_SOUND:
-                backgroundColorManager.showNotListening();
-                speechAnimationManager.hideHumanSpeaking();
-                break;
-
             case NOT_LISTENING_SOUND:
                 backgroundColorManager.showNotListening();
                 speechAnimationManager.hideHumanSpeaking();
                 break;
-
             case LISTENING_NO_SOUND:
                 backgroundColorManager.showListening();
                 speechAnimationManager.hideHumanSpeaking();
                 textAnimationManager.clearText();
                 break;
-
             case LISTENING_SOUND:
                 backgroundColorManager.showListening();
                 speechAnimationManager.showHumanSpeaking();
                 textAnimationManager.clearText();
                 break;
-
             case PROCESSING:
                 backgroundColorManager.showNotListening();
                 speechAnimationManager.hideHumanSpeaking();
                 textAnimationManager.clearText();
                 break;
-
             case SPEAKING_NOT_UNDERSTOOD:
                 speechAnimationManager.hideHumanSpeaking();
                 textAnimationManager.displayText("?");
                 break;
-
             case SPEAKING_UNDERSTOOD:
                 speechAnimationManager.hideHumanSpeaking();
-                textAnimationManager.displayText(data);
+//                textAnimationManager.displayText(data);
                 break;
         }
     }

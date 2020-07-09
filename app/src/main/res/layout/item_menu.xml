@@ -10,9 +10,9 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/dp_5"
-        android:paddingTop="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_9_5"
         android:paddingEnd="@dimen/dp_5"
-        android:paddingBottom="@dimen/dp_10">
+        android:paddingBottom="@dimen/dp_9_5">
 
         <ImageView
             android:id="@+id/ivMenu"

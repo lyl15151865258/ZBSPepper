@@ -8,7 +8,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_50"
+        android:layout_height="@dimen/dp_48"
         android:background="@color/blue"
         android:paddingStart="@dimen/dp_10"
         android:paddingEnd="@dimen/dp_10"
@@ -34,17 +34,7 @@
             android:id="@+id/speech_bar"
             android:layout_width="@dimen/dp_40"
             android:layout_height="@dimen/dp_40"
-            android:layout_toStartOf="@+id/input" />
-
-        <ImageView
-            android:id="@+id/input"
-            android:layout_width="@dimen/dp_40"
-            android:layout_height="@dimen/dp_40"
-            android:layout_centerInParent="true"
-            android:background="@drawable/bg_circle_blue"
-            android:contentDescription="@null"
-            android:padding="@dimen/dp_10"
-            android:src="@drawable/im_speech_voice" />
+            android:layout_centerInParent="true" />
 
         <LinearLayout
             android:layout_width="wrap_content"

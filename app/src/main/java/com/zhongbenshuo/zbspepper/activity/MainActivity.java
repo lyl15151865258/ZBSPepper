@@ -2,12 +2,10 @@ package com.zhongbenshuo.zbspepper.activity;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -74,30 +72,10 @@ public class MainActivity extends BaseActivity {
     private List<Menu> menuList;
     private MenuAdapter menuAdapter;
     private ViewPager2 viewPager;
-    private ImageView input;
     private SpeechBarView speechBarView;
-    private boolean isChat = false;
     private Chat mChat;
     private Future<Void> chatFuture;
     private Say mSay;
-
-    private View.OnClickListener onClickListener = (v) -> {
-        switch (v.getId()) {
-            case R.id.input:
-                if (isChat) {
-                    isChat = false;
-                    input.setImageResource(R.drawable.im_speech_voice);
-                } else {
-                    isChat = true;
-                    input.setImageResource(R.drawable.anim_speech_button);
-                    AnimationDrawable ani = (AnimationDrawable) input.getDrawable();
-                    ani.start();
-                }
-                break;
-            default:
-                break;
-        }
-    };
 
     private MenuAdapter.OnItemClickListener onItemClickListener = (view, position) -> {
         LogUtils.d(TAG, "点击了菜单列表，viewPager高度：" + viewPager.getHeight());
@@ -268,8 +246,6 @@ public class MainActivity extends BaseActivity {
         viewPager.setOffscreenPageLimit(menuList.size());
 
         speechBarView = findViewById(R.id.speech_bar);
-        input = findViewById(R.id.input);
-        input.setOnClickListener(onClickListener);
 
         QiSDK.register(this, robotLifecycleCallbacks);
     }

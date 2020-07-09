@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="@dimen/dp_5"
-        android:text="版权所有 © 中本硕机电工程有限公司 2019"
+        android:text="Copyright © 2010-2020 苏州中本硕机电工程有限公司 "
         android:textColor="@color/black"
         android:textSize="@dimen/sp_10" />
 
