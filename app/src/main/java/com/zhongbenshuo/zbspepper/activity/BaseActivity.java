@@ -47,8 +47,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     public String TAG = getClass().getName();
     private Toast toast;
     private LoadingDialog loadingDialog;
-    protected int mWidth;
-    protected int mHeight;
+    public int mWidth;
+    public int mHeight;
     protected float mDensity;
     protected int mDensityDpi;
     protected int mAvatarSize;

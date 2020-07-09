@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity {
     };
 
     private MenuAdapter.OnItemClickListener onItemClickListener = (view, position) -> {
-        LogUtils.d(TAG, "点击了菜单列表");
+        LogUtils.d(TAG, "点击了菜单列表，viewPager高度：" + viewPager.getHeight());
         for (Menu menu : menuList) {
             menu.setSelected(false);
         }
