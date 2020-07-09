@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,8 +16,6 @@ import com.zhongbenshuo.zbspepper.adapter.ChatAdapter;
 import com.zhongbenshuo.zbspepper.bean.ChatText;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.constant.Constants;
-import com.zhongbenshuo.zbspepper.utils.DeviceUtil;
-import com.zhongbenshuo.zbspepper.utils.LogUtils;
 import com.zhongbenshuo.zbspepper.utils.TimeUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -75,27 +72,6 @@ public class ChatFragment extends BaseFragment {
         rvChat.setAdapter(chatAdapter);
 
         EventBus.getDefault().register(this);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 20; i++) {
-                    int finalI = i;
-                    mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.LISTEN, "测试数据" + finalI));
-                        }
-                    });
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-        }).start();
 
         return view;
     }
