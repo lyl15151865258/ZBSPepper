@@ -25,7 +25,7 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
     private final SpeechBarStateMachine speechBarStateMachine = new SpeechBarStateMachine();
     private TextAnimationManager textAnimationManager;
     private SpeechAnimationManager speechAnimationManager;
-    private BackgroundColorManager backgroundColorManager;
+    private BackgroundColorManager backgroundDrawableManager;
 
     public SpeechBarView(Context context) {
         super(context);
@@ -48,7 +48,7 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
         speechBarStateMachine.setOnStateChangedListener(null);
 
         speechAnimationManager.release();
-        backgroundColorManager.release();
+        backgroundDrawableManager.release();
         textAnimationManager.release();
 
         super.onDetachedFromWindow();
@@ -63,11 +63,11 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
 
         textAnimationManager = new TextAnimationManager(findViewById(R.id.speech));
         speechAnimationManager = new SpeechAnimationManager(findViewById(R.id.speech_animation));
-        backgroundColorManager = new BackgroundColorManager(this);
+        backgroundDrawableManager = new BackgroundColorManager(this);
 
         speechBarStateMachine.setOnStateChangedListener(this::onSpeechStateChanged);
 
-        backgroundColorManager.showNotListening();
+        backgroundDrawableManager.showNotListening();
         textAnimationManager.clearText();
 
         onSpeechStateChanged(NOT_LISTENING_NO_SOUND, null);
@@ -135,21 +135,21 @@ public class SpeechBarView extends FrameLayout implements ISpeechBarView {
         switch (state) {
             case NOT_LISTENING_NO_SOUND:
             case NOT_LISTENING_SOUND:
-                backgroundColorManager.showNotListening();
+                backgroundDrawableManager.showNotListening();
                 speechAnimationManager.hideHumanSpeaking();
                 break;
             case LISTENING_NO_SOUND:
-                backgroundColorManager.showListening();
+                backgroundDrawableManager.showListening();
                 speechAnimationManager.hideHumanSpeaking();
                 textAnimationManager.clearText();
                 break;
             case LISTENING_SOUND:
-                backgroundColorManager.showListening();
+                backgroundDrawableManager.showListening();
                 speechAnimationManager.showHumanSpeaking();
                 textAnimationManager.clearText();
                 break;
             case PROCESSING:
-                backgroundColorManager.showNotListening();
+                backgroundDrawableManager.showNotListening();
                 speechAnimationManager.hideHumanSpeaking();
                 textAnimationManager.clearText();
                 break;

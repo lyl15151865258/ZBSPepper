@@ -72,6 +72,16 @@ public class DataBean {
         return list;
     }
 
+    public static List<DataBean> getAskContent() {
+        List<DataBean> list = new ArrayList<>();
+        list.add(new DataBean(0, "今天天气怎么样？", 1));
+        list.add(new DataBean(0, "5加3等于几?", 1));
+        list.add(new DataBean(0, "讲一个笑话吧", 1));
+        list.add(new DataBean(0, "打开音乐播放器", 1));
+        list.add(new DataBean(0, "李玉亮在办公室吗？", 1));
+        return list;
+    }
+
     public static List<String> getColors(int size) {
         List<String> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {

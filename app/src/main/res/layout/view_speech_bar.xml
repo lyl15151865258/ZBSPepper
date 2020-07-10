@@ -3,8 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:maxWidth="@dimen/dp_50"
-    android:maxHeight="@dimen/dp_50">
+    android:padding="@dimen/dp_2"
+    android:paddingStart="@dimen/dp_10"
+    android:paddingEnd="@dimen/dp_10">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_30"
+        android:adjustViewBounds="true"
+        android:contentDescription="@null"
+        android:src="@drawable/logo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/speech"
@@ -36,5 +48,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextClock
+        android:id="@+id/tcDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:format12Hour="yyyy年MM月dd日"
+        android:format24Hour="yyyy年MM月dd日"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextClock
+        android:id="@+id/tcTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:format12Hour="EEEE  HH:mm:ss"
+        android:format24Hour="EEEE  HH:mm:ss"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tcDate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

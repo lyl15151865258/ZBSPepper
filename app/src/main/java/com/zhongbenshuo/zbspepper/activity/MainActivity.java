@@ -25,9 +25,13 @@ import com.aldebaran.qi.sdk.object.holder.AutonomousAbilitiesType;
 import com.aldebaran.qi.sdk.object.holder.Holder;
 import com.aldebaran.qi.sdk.object.touch.Touch;
 import com.aldebaran.qi.sdk.object.touch.TouchSensor;
+import com.youth.banner.Banner;
+import com.youth.banner.transformer.AlphaPageTransformer;
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.adapter.FragmentAdapter;
 import com.zhongbenshuo.zbspepper.adapter.MenuAdapter;
+import com.zhongbenshuo.zbspepper.adapter.TextAdapter;
+import com.zhongbenshuo.zbspepper.bean.DataBean;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.bean.Menu;
 import com.zhongbenshuo.zbspepper.constant.Iflytek;
@@ -73,6 +77,7 @@ public class MainActivity extends BaseActivity {
     private MenuAdapter menuAdapter;
     private ViewPager2 viewPager;
     private SpeechBarView speechBarView;
+    private Banner banner;
     private Chat mChat;
     private Future<Void> chatFuture;
     private Say mSay;
@@ -245,7 +250,15 @@ public class MainActivity extends BaseActivity {
         viewPager.setAdapter(fragmentAdapter);
         viewPager.setOffscreenPageLimit(menuList.size());
 
-        speechBarView = findViewById(R.id.speech_bar);
+        speechBarView = findViewById(R.id.speechBar);
+
+        banner = findViewById(R.id.banner);
+        banner.setAdapter(new TextAdapter(DataBean.getAskContent()))
+                .addPageTransformer(new AlphaPageTransformer())
+                .isAutoLoop(true)
+                .setOrientation(Banner.VERTICAL)
+                .setDelayTime(5000)
+                .start();
 
         QiSDK.register(this, robotLifecycleCallbacks);
     }
