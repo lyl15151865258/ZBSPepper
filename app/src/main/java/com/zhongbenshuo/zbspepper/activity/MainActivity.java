@@ -3,16 +3,20 @@ package com.zhongbenshuo.zbspepper.activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.aldebaran.qi.Consumer;
 import com.aldebaran.qi.Future;
+import com.aldebaran.qi.sdk.Qi;
 import com.aldebaran.qi.sdk.QiContext;
 import com.aldebaran.qi.sdk.QiSDK;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
@@ -23,8 +27,6 @@ import com.aldebaran.qi.sdk.object.conversation.Chat;
 import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.aldebaran.qi.sdk.object.holder.AutonomousAbilitiesType;
 import com.aldebaran.qi.sdk.object.holder.Holder;
-import com.aldebaran.qi.sdk.object.touch.Touch;
-import com.aldebaran.qi.sdk.object.touch.TouchSensor;
 import com.youth.banner.Banner;
 import com.youth.banner.transformer.AlphaPageTransformer;
 import com.zhongbenshuo.zbspepper.R;
@@ -49,6 +51,7 @@ import com.zhongbenshuo.zbspepper.fragment.SettingFragment;
 import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
 import com.zhongbenshuo.zbspepper.utils.GsonUtils;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
+import com.zhongbenshuo.zbspepper.widget.InputPasswordDialog;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -57,8 +60,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 主页面
@@ -71,8 +72,12 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends BaseActivity {
 
     private Context mContext;
+    private QiContext mQiContext;
+    private boolean abilitiesHeld = false;
+    private Holder holder;
     private final ConversationStatusBinder conversationStatusBinder = new ConversationStatusBinder();
     private KeyboardVisibilityWatcher keyboardVisibilityWatcher = new KeyboardVisibilityWatcher();
+    private ConstraintLayout constraintLayout;
     private List<Menu> menuList;
     private MenuAdapter menuAdapter;
     private ViewPager2 viewPager;
@@ -83,15 +88,48 @@ public class MainActivity extends BaseActivity {
     private Say mSay;
 
     private MenuAdapter.OnItemClickListener onItemClickListener = (view, position) -> {
-        LogUtils.d(TAG, "点击了菜单列表，viewPager高度：" + viewPager.getHeight());
-        for (Menu menu : menuList) {
-            menu.setSelected(false);
+        if (position == menuList.size() - 1) {
+            InputPasswordDialog inputDialog = new InputPasswordDialog(mContext);
+            inputDialog.setOnDialogClickListener(new InputPasswordDialog.OnDialogClickListener() {
+                @Override
+                public void onOKClick() {
+                    if (TextUtils.isEmpty(inputDialog.getInputContent())) {
+                        showToast("密码不能为空");
+                    } else {
+                        if (inputDialog.getInputContent().equals("66261935")) {
+                            inputDialog.dismiss();
+                            for (Menu menu : menuList) {
+                                menu.setSelected(false);
+                            }
+                            //设置选择效果
+                            menuList.get(position).setSelected(true);
+                            menuAdapter.notifyDataSetChanged();
+                            //参数false代表瞬间切换，true表示平滑过渡
+                            viewPager.setCurrentItem(position, false);
+                        } else {
+                            inputDialog.clearInputContent();
+                            showToast("密码错误");
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelClick() {
+
+                }
+            });
+            inputDialog.setCancelable(false);
+            inputDialog.show();
+        } else {
+            for (Menu menu : menuList) {
+                menu.setSelected(false);
+            }
+            //设置选择效果
+            menuList.get(position).setSelected(true);
+            menuAdapter.notifyDataSetChanged();
+            //参数false代表瞬间切换，true表示平滑过渡
+            viewPager.setCurrentItem(position, false);
         }
-        //设置选择效果
-        menuList.get(position).setSelected(true);
-        menuAdapter.notifyDataSetChanged();
-        //参数false代表瞬间切换，true表示平滑过渡
-        viewPager.setCurrentItem(position, false);
     };
 
     private RobotLifecycleCallbacks robotLifecycleCallbacks = new RobotLifecycleCallbacks() {
@@ -101,61 +139,18 @@ public class MainActivity extends BaseActivity {
             // 获得焦点
             LogUtils.d(TAG, "获取到焦点");
 
-            // 停止自主活动
-            Holder holder = HolderBuilder.with(qiContext)
-                    .withAutonomousAbilities(AutonomousAbilitiesType.BACKGROUND_MOVEMENT)
+            mQiContext = qiContext;
+
+            mSay = SayBuilder.with(qiContext)
+                    .withText("你好")
                     .build();
-            // 异步的调用方式来停止自主能力。
-            holder.async().hold();
-            // 异步的调用方式来释放自主能力。
-//            holder.async().release();
+            Future<Void> fSay = mSay.async().run();
+            fSay.requestCancellation();
+
+            // 停止自主活动
+            holdAbilities();
 
             conversationStatusBinder.bind(qiContext, speechBarView);
-
-            Touch touch = qiContext.getTouch();
-            // 头部传感器
-            TouchSensor touchSensor = touch.getSensor("Head/Touch");
-            touchSensor.addOnStateChangedListener(touchState -> {
-                LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
-                if (touchState.getTouched()) {
-                    LogUtils.d(TAG, "触摸了头部传感器");
-                    mSay = SayBuilder.with(qiContext)
-                            .withText("摸我的头，我会容易睡着哒")
-                            .build();
-                    Future<Void> fSay = mSay.async().run();
-                    try {
-                        fSay.get();
-                    } catch (ExecutionException e) {
-                        LogUtils.d(TAG, e);
-                    } catch (CancellationException e) {
-                        LogUtils.d(TAG, "Interruption during Say");
-                    }
-                }
-            });
-            // 手部传感器
-            TouchSensor leftHandSensor = touch.getSensor("LHand/Touch");
-            TouchSensor rightHandSensor = touch.getSensor("RHand/Touch");
-            TouchSensor.OnStateChangedListener onStateChangedListenerHand = touchState -> {
-                LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
-                if (touchState.getTouched()) {
-                    LogUtils.d(TAG, "触摸了手部传感器");
-                }
-            };
-            leftHandSensor.addOnStateChangedListener(onStateChangedListenerHand);
-            rightHandSensor.addOnStateChangedListener(onStateChangedListenerHand);
-            // 底部传感器
-            TouchSensor bumperSensorBack = touch.getSensor("Bumper/Back");
-            TouchSensor bumperSensorLeft = touch.getSensor("Bumper/FrontLeft");
-            TouchSensor bumperSensorRight = touch.getSensor("Bumper/FrontRight");
-            TouchSensor.OnStateChangedListener onStateChangedListenerBumper = touchState -> {
-                LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
-                if (touchState.getTouched()) {
-                    LogUtils.d(TAG, "触摸了底部传感器");
-                }
-            };
-            bumperSensorBack.addOnStateChangedListener(onStateChangedListenerBumper);
-            bumperSensorLeft.addOnStateChangedListener(onStateChangedListenerBumper);
-            bumperSensorRight.addOnStateChangedListener(onStateChangedListenerBumper);
 
             // 讯飞AIUI平台APPID和APPKEY
             Map<String, String> myAsrParams = new HashMap<>(2);
@@ -165,33 +160,33 @@ public class MainActivity extends BaseActivity {
 //            params.put("headid", Iflytek.HEAD_ID);
             myAsrParams.put("iflytek", GsonUtils.convertJSON(params));
 
-            mSay = SayBuilder.with(qiContext)
-                    .withText(getResources().getString(R.string.greeting))
+//            mSay = SayBuilder.with(qiContext)
+//                    .withText(getResources().getString(R.string.greeting))
+//                    .build();
+//
+//            mSay.async().run().andThenConsume(consume -> {
+            // 自定义讯飞Chatbot。
+            IFlytekChatbot iflytekChatbot = new IFlytekChatbot(qiContext, mContext);
+
+            // 创建chat。
+            mChat = ChatBuilder.with(qiContext)
+                    .withChatbot(iflytekChatbot)
+                    .withAsrDriverParameters(myAsrParams)
                     .build();
 
-            mSay.async().run().andThenConsume(consume -> {
-                // 自定义讯飞Chatbot。
-                IFlytekChatbot iflytekChatbot = new IFlytekChatbot(qiContext, mContext);
+            chatFuture = mChat.async().run();
 
-                // 创建chat。
-                mChat = ChatBuilder.with(qiContext)
-                        .withChatbot(iflytekChatbot)
-                        .withAsrDriverParameters(myAsrParams)
-                        .build();
-
-                chatFuture = mChat.async().run();
-
-                chatFuture.thenConsume(future -> {
-                    if (future.hasError()) {
-                        String message = "finished with error.";
-                        LogUtils.d(TAG, message + future.getError());
-                    } else if (future.isSuccess()) {
-                        LogUtils.d(TAG, "run iflytekChatbot successful");
-                    } else if (future.isDone()) {
-                        LogUtils.d(TAG, "run iflytekChatbot isDone");
-                    }
-                });
+            chatFuture.thenConsume(future -> {
+                if (future.hasError()) {
+                    String message = "finished with error.";
+                    LogUtils.d(TAG, message + future.getError());
+                } else if (future.isSuccess()) {
+                    LogUtils.d(TAG, "run iflytekChatbot successful");
+                } else if (future.isDone()) {
+                    LogUtils.d(TAG, "run iflytekChatbot isDone");
+                }
             });
+//            });
 
         }
 
@@ -199,6 +194,7 @@ public class MainActivity extends BaseActivity {
         public void onRobotFocusLost() {
             // 失去焦点
             LogUtils.d(TAG, "失去焦点");
+            mQiContext = null;
             conversationStatusBinder.unbind(false);
             if (chatFuture != null) {
                 chatFuture.requestCancellation();
@@ -217,16 +213,19 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
+
+        constraintLayout = findViewById(R.id.layout);
+
         RecyclerView rvMenu = findViewById(R.id.rvMenu);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rvMenu.setLayoutManager(linearLayoutManager);
 
         menuList = new ArrayList<>();
-        menuList.add(new Menu(R.drawable.self, getString(R.string.SelfIntroduction), true));
-        menuList.add(new Menu(R.drawable.company, getString(R.string.CompanyProfile), false));
+        menuList.add(new Menu(R.drawable.company, getString(R.string.CompanyProfile), true));
         menuList.add(new Menu(R.drawable.scope, getString(R.string.BusinessScope), false));
         menuList.add(new Menu(R.drawable.cases, getString(R.string.EngineeringCase), false));
+        menuList.add(new Menu(R.drawable.self, getString(R.string.SelfIntroduction), false));
         menuList.add(new Menu(R.drawable.conversation, getString(R.string.ChatPage), false));
         menuList.add(new Menu(R.drawable.application, getString(R.string.MyApplication), false));
         menuList.add(new Menu(R.drawable.setting, getString(R.string.Setting), false));
@@ -239,10 +238,10 @@ public class MainActivity extends BaseActivity {
         viewPager.setUserInputEnabled(false);
 
         List<Fragment> fragments = new ArrayList<>();
-        fragments.add(new SelfIntroductionFragment());
         fragments.add(new CompanyProfileFragment());
         fragments.add(new BusinessScopeFragment());
         fragments.add(new EngineeringCaseFragment());
+        fragments.add(new SelfIntroductionFragment());
         fragments.add(new ChatFragment());
         fragments.add(new ApplicationFragment());
         fragments.add(new SettingFragment());
@@ -255,10 +254,10 @@ public class MainActivity extends BaseActivity {
         banner = findViewById(R.id.banner);
         banner.setAdapter(new TextAdapter(DataBean.getAskContent()))
                 .addPageTransformer(new AlphaPageTransformer())
-                .isAutoLoop(true)
                 .setOrientation(Banner.VERTICAL)
-                .setDelayTime(5000)
-                .start();
+                .setUserInputEnabled(false)
+                .isAutoLoop(true)
+                .setDelayTime(5000);
 
         QiSDK.register(this, robotLifecycleCallbacks);
     }
@@ -279,13 +278,15 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
-//        conversationStatusBinder.init(constraintLayout, speechBarView);
+        banner.start();
+        conversationStatusBinder.init(constraintLayout, speechBarView);
         keyboardVisibilityWatcher.subscribe(this::hideSystemBars, this);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
+        banner.stop();
         keyboardVisibilityWatcher.release();
         conversationStatusBinder.unbind(true);
         super.onPause();
@@ -293,6 +294,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        banner.destroy();
         QiSDK.unregister(this, robotLifecycleCallbacks);
         conversationStatusBinder.unbind(true);
         super.onDestroy();
@@ -340,6 +342,45 @@ public class MainActivity extends BaseActivity {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+
+    public void holdAbilities() {
+        // Build and store the holder for the abilities.
+        if (mQiContext != null) {
+            holder = HolderBuilder.with(mQiContext)
+                    .withAutonomousAbilities(
+                            AutonomousAbilitiesType.BACKGROUND_MOVEMENT,
+                            AutonomousAbilitiesType.BASIC_AWARENESS,
+                            AutonomousAbilitiesType.AUTONOMOUS_BLINKING
+                    )
+                    .build();
+            // Hold the abilities asynchronously.
+            Future<Void> holdFuture = holder.async().hold();
+            // Chain the hold with a lambda on the UI thread.
+            holdFuture.andThenConsume(Qi.onUiThread((Consumer<Void>) ignore -> {
+                // Store the abilities status.
+                abilitiesHeld = true;
+            }));
+        }
+    }
+
+    private void releaseAbilities() {
+        // Release the holder asynchronously.
+        if (mQiContext != null) {
+            holder = HolderBuilder.with(mQiContext)
+                    .withAutonomousAbilities(
+                            AutonomousAbilitiesType.BACKGROUND_MOVEMENT,
+                            AutonomousAbilitiesType.BASIC_AWARENESS,
+                            AutonomousAbilitiesType.AUTONOMOUS_BLINKING
+                    )
+                    .build();
+            Future<Void> releaseFuture = holder.async().release();
+            // Chain the release with a lambda on the UI thread.
+            releaseFuture.andThenConsume(Qi.onUiThread((Consumer<Void>) ignore -> {
+                // Store the abilities status.
+                abilitiesHeld = false;
+            }));
+        }
     }
 
 }

@@ -10,25 +10,15 @@ package com.zhongbenshuo.zbspepper.constant;
 
 public class Constants {
 
-    public static final String EMPTY = "";
-    public static final String FAIL = "fail";
-    public static final String NEW_LINE = "\n";
-    public static final String POINT = ".";
-    public static final String HYPHEN = "-";
-    public static final String SUCCESS = "success";
-
-    public static final String CITY_DATA = "china_city_data.json";
-
-    /**
-     * 退出程序点击两次返回键的间隔时间
-     */
-    public static final int EXIT_DOUBLE_CLICK_TIME = 2000;
-
-
     /**
      * EventBus标记
      */
     public static final String LISTEN = "LISTEN";
     public static final String REPLY = "REPLY";
+    public static final String LAUNCH = "LAUNCH";
     public static final String EXIT = "EXIT";
+
+    // PPT图片展示时间
+    public static final long PPT_SHOW_TIME = 10000;
+
 }

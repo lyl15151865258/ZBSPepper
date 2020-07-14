@@ -9,47 +9,41 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
+import android.widget.EditText;
 
 import com.zhongbenshuo.zbspepper.R;
 
 /**
- * 选择Dialog
- * Created at 2018/11/28 13:55
+ * 管理员输入密码的弹窗
+ * Created at 2019/9/5 13:34
  *
  * @author LiYuliang
  * @version 1.0
  */
 
-public class SelectDialog extends Dialog {
+public class InputPasswordDialog extends Dialog {
+
     private Context context;
-    private String text;
-    private TextView okBtn, cancelBtn;
+    private EditText etInput;
     private OnDialogClickListener dialogClickListener;
 
-    public SelectDialog(Context context, String text) {
+    public InputPasswordDialog(Context context) {
         super(context);
         this.context = context;
-        this.text = text;
         initView();
     }
 
     //初始化View
     private void initView() {
-        setContentView(R.layout.dialog_select);
+        setContentView(R.layout.dialog_input_password);
         initWindow();
-        okBtn = findViewById(R.id.btn_ok);
-        cancelBtn = findViewById(R.id.btn_cancel);
-        okBtn.requestFocus();
-        TextView tvWarning = findViewById(R.id.tv_warning);
-        tvWarning.setText(text);
-        okBtn.setOnClickListener((v) -> {
-            dismiss();
+        etInput = findViewById(R.id.etInput);
+        findViewById(R.id.btn_ok).setOnClickListener((v) -> {
             if (dialogClickListener != null) {
                 dialogClickListener.onOKClick();
             }
         });
-        cancelBtn.setOnClickListener((v) -> {
+        findViewById(R.id.btn_cancel).setOnClickListener((v) -> {
             dismiss();
             if (dialogClickListener != null) {
                 dialogClickListener.onCancelClick();
@@ -65,17 +59,6 @@ public class SelectDialog extends Dialog {
             //上面的代码，是用来去除Holo主题的蓝色线条
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 设置按钮上的文字
-     *
-     * @param leftText  左边按钮文字
-     * @param rightText 右边按钮文字
-     */
-    public void setButtonText(String leftText, String rightText) {
-        cancelBtn.setText(leftText);
-        okBtn.setText(rightText);
     }
 
     /**
@@ -106,4 +89,13 @@ public class SelectDialog extends Dialog {
 
         void onCancelClick();
     }
+
+    public void clearInputContent() {
+        etInput.setText("");
+    }
+
+    public String getInputContent() {
+        return etInput.getText().toString().replace(" ", "");
+    }
 }
+

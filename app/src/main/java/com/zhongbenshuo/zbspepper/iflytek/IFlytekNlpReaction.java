@@ -14,7 +14,6 @@ import com.iflytek.aiui.AIUIConstant;
 import com.iflytek.aiui.AIUIEvent;
 import com.iflytek.aiui.AIUIListener;
 import com.iflytek.aiui.AIUIMessage;
-import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.constant.Constants;
 import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
@@ -38,6 +37,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
     // TTS是否开启，需要在讯飞AIUI云端同步配置语音合成下发。
     private boolean useIFlytekTTS = false;
     private SpeechEngine mSpeechEngine;
+    private Future<Void> fSay;
 
     public IFlytekNlpReaction(QiContext context, String question) {
         super(context);
@@ -80,16 +80,16 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     Say say = SayBuilder.with(speechEngine)
                             .withText(answers)
                             .build();
-
-                    Future<Void> fSay = say.async().run();
-
+                    fSay = say.async().run();
                     try {
                         fSay.get();
+                        LogUtils.d(TAG, "Say successful");
                     } catch (ExecutionException e) {
                         LogUtils.d(TAG, "Error during Say" + e.getMessage());
                     } catch (CancellationException e) {
                         LogUtils.d(TAG, "Interruption during Say" + e);
                     }
+                    fSay.requestCancellation();
                 } else {
                     doFallback();
                 }
@@ -106,19 +106,40 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
             AIUIMessage wakeupMsg = new AIUIMessage(AIUIConstant.CMD_WAKEUP, 0, 0, "", null);
             mAIUIAgent.sendMessage(wakeupMsg);
         }
-
         LogUtils.d(TAG, "start text nlp");
         String params = "data_type=text,tag=text-tag";
         byte[] textData = question.getBytes(StandardCharsets.UTF_8);
 
         AIUIMessage write = new AIUIMessage(AIUIConstant.CMD_WRITE, 0, 0, params, textData);
         mAIUIAgent.sendMessage(write);
-
-
     }
 
     @Override
     public void stop() {
+    }
+
+    private void doFallback() {
+//        if (mSpeechEngine != null) {
+//            Say say = SayBuilder.with(mSpeechEngine)
+//                    .withText(mContext.getResources().getString(R.string.fallback_answer))
+//                    .build();
+//            Future fSay = say.async().run();
+//            try {
+//                fSay.get();
+//            } catch (ExecutionException e) {
+//                LogUtils.d(TAG, e);
+//            } catch (CancellationException e) {
+//                LogUtils.d(TAG, "Interruption during Say");
+//            }
+//        }
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public Future<Void> getSayFuture() {
+        return fSay;
     }
 
     private class MyAIUIListener implements AIUIListener {
@@ -159,8 +180,6 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     break;
                 case AIUIConstant.EVENT_RESULT:
                     // 结果解析事件
-                    LogUtils.d(TAG, "讯飞返回类型：" + event.eventType);
-                    LogUtils.d(TAG, "讯飞返回原文：" + event.info);
                     try {
                         JSONObject data = new JSONObject(event.info).getJSONArray("data").getJSONObject(0);
                         String sub = data.getJSONObject("params").optString("sub");
@@ -176,29 +195,46 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                     LogUtils.d(TAG, "nlp rc: " + rc);
                                     countDownLatch.countDown();
                                 }
-                                answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
-                                LogUtils.d(TAG, "讯飞AIUI回复：" + answer);
-                                // 古诗词有[k3]开头和[k0]结尾
-                                answer = answer.replaceAll("\\[k0]", "")
-                                        .replaceAll("\\[k1]", "")
-                                        .replaceAll("\\[k2]", "")
-                                        .replaceAll("\\[k3]", "")
-                                        .replaceAll("\\[]", "");
-                                SPHelper.save("NlpAnswer", answer);
-                                if (answer.equals("退出") || answer.equals("返回")) {
-                                    EventMsg msg = new EventMsg();
-                                    msg.setTag(Constants.EXIT);
-                                    EventBus.getDefault().post(msg);
-                                } else {
-                                    // 通过EventBus发送给UI界面更新对话列表
-                                    EventMsg msg = new EventMsg();
-                                    msg.setTag(Constants.REPLY);
-                                    msg.setMsg(answer);
-                                    EventBus.getDefault().post(msg);
+                                // 服务分类
+                                String service = result.getJSONObject("intent").getString("service");
+                                switch (service) {
+                                    case "app":
+                                        // 操作APP
+                                        String intent = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getString("intent");
+                                        String appName = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("value");
+                                        if (intent.equals("LAUNCH")) {
+                                            // 打开APP
+                                            EventMsg msg = new EventMsg();
+                                            msg.setTag(Constants.LAUNCH);
+                                            msg.setMsg(appName);
+                                            EventBus.getDefault().post(msg);
+                                        } else if (intent.equals("EXIT")) {
+                                            // 关闭APP
+                                            EventMsg msg = new EventMsg();
+                                            msg.setTag(Constants.EXIT);
+                                            msg.setMsg(appName);
+                                            EventBus.getDefault().post(msg);
+                                        }
+                                        break;
+                                    default:
+                                        answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
+                                        LogUtils.d(TAG, "讯飞AIUI回复：" + answer);
+                                        // 古诗词有[k3]开头和[k0]结尾
+                                        answer = answer.replaceAll("\\[k0]", "")
+                                                .replaceAll("\\[k1]", "")
+                                                .replaceAll("\\[k2]", "")
+                                                .replaceAll("\\[k3]", "")
+                                                .replaceAll("\\[]", "");
+                                        SPHelper.save("NlpAnswer", answer);
+                                        // 通过EventBus发送给UI界面更新对话列表
+                                        EventMsg msg = new EventMsg();
+                                        msg.setTag(Constants.REPLY);
+                                        msg.setMsg(answer);
+                                        EventBus.getDefault().post(msg);
+                                        break;
                                 }
                             }
                         }
-
                     } catch (Throwable e) {
                         LogUtils.d(TAG, "Event during EVENT_RESULT e: " + e);
                     } finally {
@@ -275,26 +311,6 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     break;
                 default:
                     break;
-            }
-        }
-    }
-
-    public String getAnswer() {
-        return answer;
-    }
-
-    private void doFallback() {
-        if (mSpeechEngine != null) {
-            Say say = SayBuilder.with(mSpeechEngine)
-                    .withText(mContext.getResources().getString(R.string.fallback_answer))
-                    .build();
-            Future fSay = say.async().run();
-            try {
-                fSay.get();
-            } catch (ExecutionException e) {
-                LogUtils.d(TAG, e);
-            } catch (CancellationException e) {
-                LogUtils.d(TAG, "Interruption during Say");
             }
         }
     }

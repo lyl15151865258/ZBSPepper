@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,8 +18,13 @@ import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.activity.MainActivity;
 import com.zhongbenshuo.zbspepper.adapter.AppAdapter;
 import com.zhongbenshuo.zbspepper.bean.AppInfo;
+import com.zhongbenshuo.zbspepper.bean.EventMsg;
+import com.zhongbenshuo.zbspepper.constant.Constants;
 import com.zhongbenshuo.zbspepper.utils.ApkUtils;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -97,11 +103,36 @@ public class ApplicationFragment extends BaseFragment {
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         intentFilter.addDataScheme("package");
         mContext.registerReceiver(installListener, intentFilter);
 
+        EventBus.getDefault().register(this);
+
         return view;
+    }
+
+    /**
+     * 收到EventBus发来的消息并处理
+     *
+     * @param msg 消息对象
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveMessage(EventMsg msg) {
+        switch (msg.getTag()) {
+            case Constants.LAUNCH:
+                // 打开应用
+                for (AppInfo appInfo : appList) {
+                    if (appInfo.getAppName().equalsIgnoreCase(msg.getMsg())) {
+                        PackageManager packageManager = mainActivity.getPackageManager();
+                        Intent intent = packageManager.getLaunchIntentForPackage(appInfo.getPackageName());
+                        startActivity(intent);
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -128,5 +159,8 @@ public class ApplicationFragment extends BaseFragment {
     public void onDestroy() {
         super.onDestroy();
         mContext.unregisterReceiver(installListener);
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
     }
 }

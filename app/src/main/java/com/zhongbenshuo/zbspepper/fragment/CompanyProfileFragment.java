@@ -15,6 +15,7 @@ import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.activity.MainActivity;
 import com.zhongbenshuo.zbspepper.adapter.ImageAdapter;
 import com.zhongbenshuo.zbspepper.bean.DataBean;
+import com.zhongbenshuo.zbspepper.constant.Constants;
 import com.zhongbenshuo.zbspepper.indicator.NumIndicator;
 
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +46,7 @@ public class CompanyProfileFragment extends BaseFragment {
                 .setIndicator(new NumIndicator(mContext))
                 .setIndicatorGravity(IndicatorConfig.Direction.RIGHT)
                 .isAutoLoop(false)
-                .setDelayTime(8000);
+                .setDelayTime(Constants.PPT_SHOW_TIME);
         return view;
     }
 
