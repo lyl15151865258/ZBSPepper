@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
@@ -79,6 +80,12 @@ public class InputPasswordDialog extends Dialog {
 
     public void setOnDialogClickListener(OnDialogClickListener clickListener) {
         dialogClickListener = clickListener;
+    }
+
+    public void setTextChangedListener(TextWatcher textChangedListener) {
+        if (etInput != null) {
+            etInput.addTextChangedListener(textChangedListener);
+        }
     }
 
     /**

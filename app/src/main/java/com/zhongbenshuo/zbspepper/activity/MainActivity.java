@@ -2,8 +2,11 @@ package com.zhongbenshuo.zbspepper.activity;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -56,6 +59,7 @@ import com.zhongbenshuo.zbspepper.widget.InputPasswordDialog;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,10 +90,31 @@ public class MainActivity extends BaseActivity {
     private Chat mChat;
     private Future<Void> chatFuture;
     private Say mSay;
+    private static final int WAIT_TIME_SECONDS = 10;
+    private static boolean flag = true;
+    private static volatile long seconds = 0;
+    private InputPasswordDialog inputDialog;
+    private SyncTimeTask syncTimeTask;
 
     private MenuAdapter.OnItemClickListener onItemClickListener = (view, position) -> {
         if (position == menuList.size() - 1) {
-            InputPasswordDialog inputDialog = new InputPasswordDialog(mContext);
+            inputDialog = new InputPasswordDialog(mContext);
+            inputDialog.setTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    seconds = 0;
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
             inputDialog.setOnDialogClickListener(new InputPasswordDialog.OnDialogClickListener() {
                 @Override
                 public void onOKClick() {
@@ -118,6 +143,7 @@ public class MainActivity extends BaseActivity {
 
                 }
             });
+            seconds = 0;
             inputDialog.setCancelable(false);
             inputDialog.show();
         } else {
@@ -260,6 +286,9 @@ public class MainActivity extends BaseActivity {
                 .setDelayTime(5000);
 
         QiSDK.register(this, robotLifecycleCallbacks);
+
+        syncTimeTask = new SyncTimeTask(this);
+        syncTimeTask.execute();
     }
 
     /**
@@ -294,6 +323,11 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        flag = false;
+        if (syncTimeTask != null) {
+            syncTimeTask.cancel(true);
+            syncTimeTask = null;
+        }
         banner.destroy();
         QiSDK.unregister(this, robotLifecycleCallbacks);
         conversationStatusBinder.unbind(true);
@@ -349,9 +383,9 @@ public class MainActivity extends BaseActivity {
         if (mQiContext != null) {
             holder = HolderBuilder.with(mQiContext)
                     .withAutonomousAbilities(
-                            AutonomousAbilitiesType.BACKGROUND_MOVEMENT,
-                            AutonomousAbilitiesType.BASIC_AWARENESS,
-                            AutonomousAbilitiesType.AUTONOMOUS_BLINKING
+                            AutonomousAbilitiesType.BACKGROUND_MOVEMENT
+//                            AutonomousAbilitiesType.BASIC_AWARENESS,
+//                            AutonomousAbilitiesType.AUTONOMOUS_BLINKING
                     )
                     .build();
             // Hold the abilities asynchronously.
@@ -380,6 +414,56 @@ public class MainActivity extends BaseActivity {
                 // Store the abilities status.
                 abilitiesHeld = false;
             }));
+        }
+    }
+
+    // 无限循环的定时任务
+    private static class SyncTimeTask extends AsyncTask<Void, Void, Void> {
+
+        private WeakReference<MainActivity> mainActivityWeakReference;
+
+        private SyncTimeTask(MainActivity activity) {
+            mainActivityWeakReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            while (flag) {
+                if (isCancelled()) {
+                    break;
+                }
+                publishProgress();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                seconds++;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate();
+            if (isCancelled()) {
+                return;
+            }
+            MainActivity mainActivity = mainActivityWeakReference.get();
+            LogUtils.d(mainActivity.TAG, "当前seconds为：" + seconds);
+            if (seconds > WAIT_TIME_SECONDS && mainActivity.inputDialog != null) {
+                mainActivity.inputDialog.dismiss();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
         }
     }
 
