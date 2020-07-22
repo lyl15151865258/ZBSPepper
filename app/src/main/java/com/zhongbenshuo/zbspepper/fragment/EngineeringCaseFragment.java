@@ -15,10 +15,27 @@ import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.activity.MainActivity;
 import com.zhongbenshuo.zbspepper.adapter.ImageAdapter;
 import com.zhongbenshuo.zbspepper.bean.DataBean;
+import com.zhongbenshuo.zbspepper.bean.Picture;
+import com.zhongbenshuo.zbspepper.bean.Result;
 import com.zhongbenshuo.zbspepper.constant.Constants;
+import com.zhongbenshuo.zbspepper.constant.ErrorCode;
+import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
 import com.zhongbenshuo.zbspepper.indicator.NumIndicator;
+import com.zhongbenshuo.zbspepper.network.ExceptionHandle;
+import com.zhongbenshuo.zbspepper.network.NetClient;
+import com.zhongbenshuo.zbspepper.network.NetworkObserver;
+import com.zhongbenshuo.zbspepper.utils.GsonUtils;
+import com.zhongbenshuo.zbspepper.utils.NetworkUtil;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * 工程案例页面
@@ -41,12 +58,7 @@ public class EngineeringCaseFragment extends BaseFragment {
         mContext = getContext();
         mainActivity = (MainActivity) getActivity();
         banner = view.findViewById(R.id.banner);
-        banner.setAdapter(new ImageAdapter(DataBean.getEngineeringCaseResources()))
-                .addPageTransformer(new ScaleInTransformer())
-                .setIndicator(new NumIndicator(mContext))
-                .setIndicatorGravity(IndicatorConfig.Direction.RIGHT)
-                .isAutoLoop(false)
-                .setDelayTime(Constants.PPT_SHOW_TIME);
+        queryPepperProject();
         return view;
     }
 
@@ -55,6 +67,61 @@ public class EngineeringCaseFragment extends BaseFragment {
         super.onResume();
         banner.isAutoLoop(true);
         banner.start();
+    }
+
+    /**
+     * 获取图片
+     */
+    private void queryPepperProject() {
+        Observable<Result> observable = NetClient.getInstance(NetClient.getBaseUrl(), false).getZbsApi().queryPepperProject();
+        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new NetworkObserver<Result>(mContext) {
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                //接下来可以检查网络连接等操作
+                if (!NetworkUtil.isNetworkAvailable(mContext)) {
+                    loadLastPictures();
+                }
+            }
+
+            @Override
+            public void onError(ExceptionHandle.ResponseThrowable responseThrowable) {
+                loadLastPictures();
+            }
+
+            @Override
+            public void onNext(Result result) {
+                if (result.getCode() == ErrorCode.SUCCESS) {
+                    List<Picture> pictureResult = GsonUtils.parseJSONList(GsonUtils.convertJSON(result.getData()), Picture.class);
+                    List<DataBean> dataBeans = new ArrayList<>();
+                    for (Picture picture : pictureResult) {
+                        dataBeans.add(new DataBean((NetClient.getResourceUrl() + picture.getUrl()).replace("\\", "/"), null, 1));
+                    }
+                    SPHelper.save("engineering", GsonUtils.convertJSON(dataBeans));
+                    banner.setAdapter(new ImageAdapter(mContext, dataBeans))
+                            .addPageTransformer(new ScaleInTransformer())
+                            .setIndicator(new NumIndicator(mContext))
+                            .setIndicatorGravity(IndicatorConfig.Direction.RIGHT)
+                            .isAutoLoop(false)
+                            .setDelayTime(Constants.PPT_SHOW_TIME);
+                } else {
+                    loadLastPictures();
+                }
+            }
+        });
+    }
+
+    /**
+     * 加载上一次保存的图片
+     */
+    private void loadLastPictures() {
+        List<DataBean> dataBeans = GsonUtils.parseJSONList(SPHelper.getString("engineering", GsonUtils.convertJSON(new ArrayList<>())), DataBean.class);
+        banner.setAdapter(new ImageAdapter(mContext, dataBeans))
+                .addPageTransformer(new ScaleInTransformer())
+                .setIndicator(new NumIndicator(mContext))
+                .setIndicatorGravity(IndicatorConfig.Direction.RIGHT)
+                .isAutoLoop(false)
+                .setDelayTime(Constants.PPT_SHOW_TIME);
     }
 
     @Override

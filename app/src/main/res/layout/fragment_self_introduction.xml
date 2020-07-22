@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/transparent"
     android:padding="@dimen/dp_5"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.zhongbenshuo.zbspepper.widget.textview.MixtureTextView
+        android:id="@+id/tvSelf"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivPepper"
             android:layout_width="@dimen/dp_120"
             android:layout_height="@dimen/dp_120"
             android:contentDescription="@null"
+            android:layout_alignParentEnd="true"
             android:scaleType="fitXY"
             android:src="@drawable/photo_pepper" />
 
-    </LinearLayout>
+    </com.zhongbenshuo.zbspepper.widget.textview.MixtureTextView>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

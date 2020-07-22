@@ -12,13 +12,17 @@ public class NetWork {
 
     public static final String ENCRYPT_KEY = "IZnqNJqgLwPLO9LxMP23xZNmHHq55AmB";
 
-    //主账号IP地址
-    public static final String SERVER_DOMAIN_NAME = "www.zhongbenshuo.com";
-    public static final String SERVER_HOST_MAIN = "https://www.zhongbenshuo.com";
-    //主账号端口号
-    public static final String SERVER_PORT_MAIN = "443";
-    //主账号项目名
-    public static final String PROJECT_MAIN = "OA";
+    //项目IP地址
+    public static final String SERVER_HOST_MAIN = "http://www.zhongbenshuo.com";
+    //项目端口号
+    public static final String SERVER_PORT_MAIN = "8888";
+    //项目名
+    public static final String PROJECT_MAIN = "Pepper";
+
+    //资源文件IP地址
+    public static final String SERVER_HOST_RESOURCE = "https://www.zhongbenshuo.com";
+    //资源文件端口号
+    public static final String SERVER_PORT_RESOURCE = "443";
 
     //http请求超时时间（单位：秒）
     public static final int TIME_OUT_HTTP = 5;

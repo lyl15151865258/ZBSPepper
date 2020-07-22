@@ -12,23 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.zhongbenshuo.zbspepper.R;
-import com.zhongbenshuo.zbspepper.bean.RSAResult;
-import com.zhongbenshuo.zbspepper.bean.Result;
-import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
-import com.zhongbenshuo.zbspepper.network.ExceptionHandle;
-import com.zhongbenshuo.zbspepper.network.NetClient;
-import com.zhongbenshuo.zbspepper.network.NetworkObserver;
 import com.zhongbenshuo.zbspepper.utils.ActivityController;
-import com.zhongbenshuo.zbspepper.utils.GsonUtils;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
-import com.zhongbenshuo.zbspepper.utils.NetworkUtil;
 import com.zhongbenshuo.zbspepper.utils.PermissionUtil;
 import com.zhongbenshuo.zbspepper.widget.SelectDialog;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Logo页面
@@ -51,38 +38,6 @@ public class LogoActivity extends BaseActivity {
     }
 
     /**
-     * 获取服务器的RSA公钥（不需要加解密）
-     */
-    private void getRSAPublicKey() {
-        Observable<Result> observable = NetClient.getInstance(NetClient.getBaseUrlProject(), false).getZbsApi().getRSAPublicKey();
-        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new NetworkObserver<Result>(this) {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                //接下来可以检查网络连接等操作
-                if (!NetworkUtil.isNetworkAvailable(mContext)) {
-                    showToast("网络不可用");
-                }
-            }
-
-            @Override
-            public void onError(ExceptionHandle.ResponseThrowable responseThrowable) {
-                openActivity(MainActivity.class);
-                ActivityController.finishActivity(LogoActivity.this);
-            }
-
-            @Override
-            public void onNext(Result result) {
-                RSAResult rsaResult = GsonUtils.parseJSON(GsonUtils.convertJSON(result.getData()), RSAResult.class);
-                LogUtils.d(TAG, "服务器的RSA公钥是：" + rsaResult.getRsaPublicKey());
-                SPHelper.save("serverPublicKey", rsaResult.getRsaPublicKey());
-                openActivity(MainActivity.class);
-                ActivityController.finishActivity(LogoActivity.this);
-            }
-        });
-    }
-
-    /**
      * 检查权限
      */
     private void checkPermission() {
@@ -91,7 +46,8 @@ public class LogoActivity extends BaseActivity {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {
             showToWriteSettings();
         } else {
-            getRSAPublicKey();
+            openActivity(MainActivity.class);
+            ActivityController.finishActivity(LogoActivity.this);
         }
     }
 
@@ -127,7 +83,8 @@ public class LogoActivity extends BaseActivity {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {
             showToWriteSettings();
         } else {
-            getRSAPublicKey();
+            openActivity(MainActivity.class);
+            ActivityController.finishActivity(LogoActivity.this);
         }
     }
 
@@ -186,14 +143,16 @@ public class LogoActivity extends BaseActivity {
                 // 权限被拒绝，提示用户到设置页面授予权限（防止用户点击了“不再提示”后，无法通过弹窗申请权限）
                 showToSettings();
             } else {
-                getRSAPublicKey();
+                openActivity(MainActivity.class);
+                ActivityController.finishActivity(LogoActivity.this);
             }
         } else if (requestCode == 600) {
             //Settings.System.canWrite方法检测授权结果
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {
                 showRequestPermissionDialog();
             } else {
-                getRSAPublicKey();
+                openActivity(MainActivity.class);
+                ActivityController.finishActivity(LogoActivity.this);
             }
         }
     }

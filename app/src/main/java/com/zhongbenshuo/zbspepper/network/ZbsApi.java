@@ -24,20 +24,44 @@ import retrofit2.http.Url;
 public interface ZbsApi {
 
     /**
-     * 查询服务器RSA公钥
+     * 查询公司简介图片
      *
      * @return 返回值
      */
-    @GET("user/rsaPublicKey.do")
-    Observable<Result> getRSAPublicKey();
+    @GET("pepper/queryPepperCompany")
+    Observable<Result> queryPepperCompany();
 
     /**
-     * 查询员工状态
+     * 查询经营范围图片
      *
      * @return 返回值
      */
-    @POST("user/getEmployeeStatus.do")
-    Observable<Result> getEmployeeStatus(@Body JsonObject params);
+    @GET("pepper/queryPepperBusiness")
+    Observable<Result> queryPepperBusiness();
+
+    /**
+     * 查询工程案例图片
+     *
+     * @return 返回值
+     */
+    @GET("pepper/queryPepperProject")
+    Observable<Result> queryPepperProject();
+
+    /**
+     * 查询自我介绍文本
+     *
+     * @return 返回值
+     */
+    @GET("pepper/querySelfIntroduction")
+    Observable<Result> querySelfIntroduction();
+
+    /**
+     * 查询询问语句
+     *
+     * @return 返回值
+     */
+    @GET("pepper/queryAskSentence")
+    Observable<Result> queryAskSentence();
 
     /**
      * 远程开关门

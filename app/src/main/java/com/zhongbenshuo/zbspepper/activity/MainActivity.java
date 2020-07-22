@@ -39,7 +39,10 @@ import com.zhongbenshuo.zbspepper.adapter.TextAdapter;
 import com.zhongbenshuo.zbspepper.bean.DataBean;
 import com.zhongbenshuo.zbspepper.bean.EventMsg;
 import com.zhongbenshuo.zbspepper.bean.Menu;
+import com.zhongbenshuo.zbspepper.bean.Result;
+import com.zhongbenshuo.zbspepper.constant.ErrorCode;
 import com.zhongbenshuo.zbspepper.constant.Iflytek;
+import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
 import com.zhongbenshuo.zbspepper.design.activity.conversationstatus.ConversationStatusBinder;
 import com.zhongbenshuo.zbspepper.design.activity.utils.KeyboardVisibilityWatcher;
 import com.zhongbenshuo.zbspepper.design.activity.utils.ScreenFlagsChecker;
@@ -52,8 +55,12 @@ import com.zhongbenshuo.zbspepper.fragment.EngineeringCaseFragment;
 import com.zhongbenshuo.zbspepper.fragment.SelfIntroductionFragment;
 import com.zhongbenshuo.zbspepper.fragment.SettingFragment;
 import com.zhongbenshuo.zbspepper.iflytek.IFlytekChatbot;
+import com.zhongbenshuo.zbspepper.network.ExceptionHandle;
+import com.zhongbenshuo.zbspepper.network.NetClient;
+import com.zhongbenshuo.zbspepper.network.NetworkObserver;
 import com.zhongbenshuo.zbspepper.utils.GsonUtils;
 import com.zhongbenshuo.zbspepper.utils.LogUtils;
+import com.zhongbenshuo.zbspepper.utils.NetworkUtil;
 import com.zhongbenshuo.zbspepper.widget.InputPasswordDialog;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -64,6 +71,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * 主页面
@@ -278,17 +290,65 @@ public class MainActivity extends BaseActivity {
         speechBarView = findViewById(R.id.speechBar);
 
         banner = findViewById(R.id.banner);
-        banner.setAdapter(new TextAdapter(DataBean.getAskContent()))
-                .addPageTransformer(new AlphaPageTransformer())
-                .setOrientation(Banner.VERTICAL)
-                .setUserInputEnabled(false)
-                .isAutoLoop(true)
-                .setDelayTime(5000);
 
         QiSDK.register(this, robotLifecycleCallbacks);
 
         syncTimeTask = new SyncTimeTask(this);
         syncTimeTask.execute();
+
+        queryAskSentence();
+    }
+
+    /**
+     * 获取询问语句
+     */
+    private void queryAskSentence() {
+        Observable<Result> observable = NetClient.getInstance(NetClient.getBaseUrl(), false).getZbsApi().queryAskSentence();
+        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new NetworkObserver<Result>(mContext) {
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                //接下来可以检查网络连接等操作
+                if (!NetworkUtil.isNetworkAvailable(mContext)) {
+                    loadLastAskSentence();
+                }
+            }
+
+            @Override
+            public void onError(ExceptionHandle.ResponseThrowable responseThrowable) {
+                loadLastAskSentence();
+            }
+
+            @Override
+            public void onNext(Result result) {
+                if (result.getCode() == ErrorCode.SUCCESS) {
+                    List<String> stringList = GsonUtils.parseJSONList(GsonUtils.convertJSON(result.getData()), String.class);
+                    List<DataBean> dataBeans = new ArrayList<>();
+                    for (String content : stringList) {
+                        dataBeans.add(new DataBean(0, content, 1));
+                    }
+                    SPHelper.save("askSentence", GsonUtils.convertJSON(dataBeans));
+                    banner.setAdapter(new TextAdapter(dataBeans))
+                            .addPageTransformer(new AlphaPageTransformer())
+                            .setOrientation(Banner.VERTICAL)
+                            .setUserInputEnabled(false)
+                            .isAutoLoop(true)
+                            .setDelayTime(5000);
+                } else {
+                    loadLastAskSentence();
+                }
+            }
+        });
+    }
+
+    private void loadLastAskSentence() {
+        List<DataBean> dataBeans = GsonUtils.parseJSONList(SPHelper.getString("askSentence", GsonUtils.convertJSON(new ArrayList<>())), DataBean.class);
+        banner.setAdapter(new TextAdapter(dataBeans))
+                .addPageTransformer(new AlphaPageTransformer())
+                .setOrientation(Banner.VERTICAL)
+                .setUserInputEnabled(false)
+                .isAutoLoop(true)
+                .setDelayTime(5000);
     }
 
     /**

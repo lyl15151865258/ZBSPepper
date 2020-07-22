@@ -458,7 +458,7 @@ public class NetClient {
     }
 
     /**
-     * 主账号基础Url不带项目名（用于图像链接中）
+     * 基础Url不带项目名（用于接口请求）
      */
     public static String getBaseUrl() {
         // 计算主服务器的URL路径
@@ -474,7 +474,7 @@ public class NetClient {
     }
 
     /**
-     * 主账号基础Url带项目名
+     * 基础Url带项目名
      */
     public static String getBaseUrlProject() {
         // 计算主服务器的URL路径
@@ -487,6 +487,13 @@ public class NetClient {
             port = NetWork.SERVER_PORT_MAIN;
         }
         return ip + ":" + port + "/" + NetWork.PROJECT_MAIN + "/";
+    }
+
+    /**
+     * 基础Url不带项目名（用于图像链接中）
+     */
+    public static String getResourceUrl() {
+        return NetWork.SERVER_HOST_RESOURCE + ":" + NetWork.SERVER_PORT_RESOURCE + "/";
     }
 
 }

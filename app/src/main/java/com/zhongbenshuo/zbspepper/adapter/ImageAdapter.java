@@ -1,5 +1,6 @@
 package com.zhongbenshuo.zbspepper.adapter;
 
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -7,6 +8,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.youth.banner.adapter.BannerAdapter;
 import com.zhongbenshuo.zbspepper.bean.DataBean;
 
@@ -17,9 +19,12 @@ import java.util.List;
  */
 public class ImageAdapter extends BannerAdapter<DataBean, ImageAdapter.ImageHolder> {
 
-    public ImageAdapter(List<DataBean> mDatas) {
+    private Context mContext;
+
+    public ImageAdapter(Context mContext, List<DataBean> mDatas) {
         //设置数据，也可以调用banner提供的方法,或者自己在adapter中实现
         super(mDatas);
+        this.mContext = mContext;
     }
 
     //更新数据
@@ -44,7 +49,8 @@ public class ImageAdapter extends BannerAdapter<DataBean, ImageAdapter.ImageHold
 
     @Override
     public void onBindView(ImageHolder holder, DataBean data, int position, int size) {
-        holder.imageView.setImageResource(data.imageRes);
+//        holder.imageView.setImageResource(data.imageRes);
+        Glide.with(mContext).load(data.imageUrl).into(holder.imageView);
     }
 
     static class ImageHolder extends RecyclerView.ViewHolder {

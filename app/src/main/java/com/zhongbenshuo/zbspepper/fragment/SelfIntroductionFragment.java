@@ -10,8 +10,21 @@ import androidx.annotation.Nullable;
 
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.activity.MainActivity;
+import com.zhongbenshuo.zbspepper.bean.Result;
+import com.zhongbenshuo.zbspepper.constant.ErrorCode;
+import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
+import com.zhongbenshuo.zbspepper.network.ExceptionHandle;
+import com.zhongbenshuo.zbspepper.network.NetClient;
+import com.zhongbenshuo.zbspepper.network.NetworkObserver;
+import com.zhongbenshuo.zbspepper.utils.NetworkUtil;
+import com.zhongbenshuo.zbspepper.widget.textview.MixtureTextView;
 
 import org.jetbrains.annotations.NotNull;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * 自我介绍页面
@@ -25,6 +38,7 @@ public class SelfIntroductionFragment extends BaseFragment {
 
     private Context mContext;
     private MainActivity mainActivity;
+    private MixtureTextView tvSelf;
 
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -32,9 +46,49 @@ public class SelfIntroductionFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_self_introduction, container, false);
         mContext = getContext();
         mainActivity = (MainActivity) getActivity();
-
+        tvSelf = view.findViewById(R.id.tvSelf);
+        tvSelf.setText(getString(R.string.self));
+        querySelfIntroduction();
         return view;
     }
+
+    /**
+     * 获取自我介绍文本
+     */
+    private void querySelfIntroduction() {
+        Observable<Result> observable = NetClient.getInstance(NetClient.getBaseUrl(), false).getZbsApi().querySelfIntroduction();
+        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new NetworkObserver<Result>(mContext) {
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                //接下来可以检查网络连接等操作
+                if (!NetworkUtil.isNetworkAvailable(mContext)) {
+                    loadLastSelfIntroduction();
+                }
+            }
+
+            @Override
+            public void onError(ExceptionHandle.ResponseThrowable responseThrowable) {
+                loadLastSelfIntroduction();
+            }
+
+            @Override
+            public void onNext(Result result) {
+                if (result.getCode() == ErrorCode.SUCCESS) {
+                    String self = String.valueOf(result.getData());
+                    SPHelper.save("self", self);
+                    tvSelf.setText(self);
+                } else {
+                    loadLastSelfIntroduction();
+                }
+            }
+        });
+    }
+
+    private void loadLastSelfIntroduction() {
+        tvSelf.setText(SPHelper.getString("self", ""));
+    }
+
 
     @Override
     public void onFirstUserVisible() {
