@@ -75,7 +75,7 @@ public class SelfIntroductionFragment extends BaseFragment {
             @Override
             public void onNext(Result result) {
                 if (result.getCode() == ErrorCode.SUCCESS) {
-                    String self = String.valueOf(result.getData());
+                    String self = "\t\t\t\t\t" + String.valueOf(result.getData()).replace("\n", "\n\t\t\t\t\t");
                     SPHelper.save("self", self);
                     tvSelf.setText(self);
                 } else {
