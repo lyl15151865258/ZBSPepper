@@ -7,9 +7,6 @@ import android.util.SparseArray;
 import android.widget.Toast;
 
 import com.aldebaran.qi.sdk.util.IOUtils;
-import com.iflytek.cloud.SpeechConstant;
-import com.iflytek.cloud.SpeechUtility;
-import com.zhongbenshuo.zbspepper.constant.Iflytek;
 import com.zhongbenshuo.zbspepper.contentprovider.SPHelper;
 import com.zhongbenshuo.zbspepper.utils.CrashHandler;
 import com.zhongbenshuo.zbspepper.utils.encrypt.RSAUtils;
@@ -40,8 +37,6 @@ public class ZBSPepperApplication extends Application {
         CrashHandler.getInstance().init(this);
         // 检查在aiui_phone是否配置appid。
         checkAppIdAndKey();
-        // 初始化讯飞语音唤醒
-        initWakeUp();
         // 初始化加密秘钥
         initKey();
     }
@@ -76,24 +71,6 @@ public class ZBSPepperApplication extends Application {
         } catch (JSONException e) {
             Log.e(TAG, "Error during check appid " + e);
         }
-    }
-
-    /**
-     * 初始化讯飞语音唤醒
-     */
-    private void initWakeUp() {
-        // 应用程序入口处调用,避免手机内存过小,杀死后台进程后通过历史intent进入Activity造成SpeechUtility对象为null
-        // 注意：此接口在非主进程调用会返回null对象，如需在非主进程使用语音功能，请增加参数：SpeechConstant.FORCE_LOGIN+"=true"
-        // 参数间使用“,”分隔。
-        // 设置你申请的应用appid
-
-        // 注意： appid 必须和下载的SDK保持一致，否则会出现10407错误
-        StringBuilder param = new StringBuilder();
-        param.append(SpeechConstant.APPID + "=" + Iflytek.APP_ID);
-        param.append(",");
-        // 设置使用v5+
-        param.append(SpeechConstant.ENGINE_MODE + "=" + SpeechConstant.MODE_MSC);
-        SpeechUtility.createUtility(instance, param.toString());
     }
 
     /**

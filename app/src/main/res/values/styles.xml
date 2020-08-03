@@ -54,4 +54,20 @@
         <attr name="animator_play_time" />
     </declare-styleable>
 
+    <style name="toggle">
+        <item name="android:background">@drawable/check_switch</item>
+        <item name="android:textOff">""</item>
+        <item name="android:textOn">""</item>
+    </style>
+
+    <declare-styleable name="BatteryView">
+        <attr name="border" format="dimension"/>
+        <attr name="inside_margin" format="dimension"/>
+        <attr name="radius" format="dimension"/>
+        <attr name="mainColor" format="color"/>
+        <attr name="chargingColor" format="color"/>
+        <attr name="normalColor" format="color"/>
+        <attr name="lowPowerColor" format="color"/>
+    </declare-styleable>
+
 </resources>

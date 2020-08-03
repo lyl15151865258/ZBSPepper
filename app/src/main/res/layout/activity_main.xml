@@ -38,34 +38,64 @@
         android:layout_height="0dp"
         android:background="@drawable/background"
         android:overScrollMode="never"
-        app:layout_constraintBottom_toTopOf="@id/llAsk"
+        app:layout_constraintBottom_toTopOf="@id/tvAsk"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/divider"
         app:layout_constraintTop_toBottomOf="@id/speechBar" />
 
-    <LinearLayout
-        android:id="@+id/llAsk"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvAsk"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_30"
+        android:background="@color/blue"
+        android:paddingStart="@dimen/dp_5"
+        android:paddingTop="@dimen/dp_5"
+        android:paddingEnd="@dimen/dp_0"
+        android:paddingBottom="@dimen/dp_5"
+        android:text="您可以这样跟我说："
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/divider"
+        app:layout_constraintTop_toBottomOf="@id/viewpager" />
+
+    <com.youth.banner.Banner
+        android:id="@+id/banner"
         android:layout_width="0dp"
         android:layout_height="@dimen/dp_30"
         android:background="@color/blue"
-        android:gravity="center_vertical"
-        android:padding="@dimen/dp_3"
+        android:paddingStart="@dimen/dp_0"
+        android:paddingTop="@dimen/dp_5"
+        android:paddingEnd="@dimen/dp_5"
+        android:paddingBottom="@dimen/dp_5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/llBattery"
+        app:layout_constraintStart_toEndOf="@id/tvAsk"
+        app:layout_constraintTop_toBottomOf="@id/viewpager" />
+
+    <LinearLayout
+        android:id="@+id/llBattery"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_30"
+        android:background="@color/blue"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/dp_10"
+        android:paddingEnd="@dimen/dp_10"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/divider"
-        app:layout_constraintTop_toBottomOf="@id/viewpager">
+        app:layout_constraintStart_toEndOf="@id/banner"
+        app:layout_constraintTop_toTopOf="@id/tvAsk">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="您可以这样跟我说："
-            android:textColor="@color/white"
-            android:textSize="@dimen/sp_16" />
-
-        <com.youth.banner.Banner
-            android:id="@+id/banner"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <com.zhongbenshuo.zbspepper.widget.BatteryView
+            android:id="@+id/batteryView"
+            android:layout_width="@dimen/dp_12"
+            android:layout_height="@dimen/dp_6"
+            app:border="@dimen/dp_0_5"
+            app:chargingColor="@android:color/holo_blue_light"
+            app:inside_margin="@dimen/dp_1"
+            app:lowPowerColor="@android:color/holo_red_dark"
+            app:mainColor="#777" />
 
     </LinearLayout>
 

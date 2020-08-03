@@ -1,6 +1,7 @@
 package com.zhongbenshuo.zbspepper.iflytek;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.aldebaran.qi.Future;
 import com.aldebaran.qi.sdk.QiContext;
@@ -8,6 +9,8 @@ import com.aldebaran.qi.sdk.builder.SayBuilder;
 import com.aldebaran.qi.sdk.object.conversation.BaseChatbotReaction;
 import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.aldebaran.qi.sdk.object.conversation.SpeechEngine;
+import com.aldebaran.qi.sdk.object.touch.Touch;
+import com.aldebaran.qi.sdk.object.touch.TouchSensor;
 import com.aldebaran.qi.sdk.util.IOUtils;
 import com.iflytek.aiui.AIUIAgent;
 import com.iflytek.aiui.AIUIConstant;
@@ -23,6 +26,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -43,6 +47,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         super(context);
         this.mContext = context;
         this.question = question;
+        initSensorListener(context);
     }
 
     public AIUIAgent createAgent(MyAIUIListener mAIUIListener) {
@@ -83,13 +88,11 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                     fSay = say.async().run();
                     try {
                         fSay.get();
-                        LogUtils.d(TAG, "Say successful");
                     } catch (ExecutionException e) {
-                        LogUtils.d(TAG, "Error during Say" + e.getMessage());
+                        Log.e(TAG, "Error during Say", e);
                     } catch (CancellationException e) {
-                        LogUtils.d(TAG, "Interruption during Say" + e);
+                        Log.i(TAG, "Interruption during Say" + e);
                     }
-                    fSay.requestCancellation();
                 } else {
                     doFallback();
                 }
@@ -99,6 +102,63 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
             LogUtils.d(TAG, "aiuiAgent destroy");
             answer = myAIUIListener.answer;
         }
+    }
+
+    /**
+     * 初始化传感器监听
+     */
+    private void initSensorListener(QiContext qiContent) {
+        Touch touch = qiContent.getTouch();
+        // 头部传感器
+        TouchSensor touchSensor = touch.getSensor("Head/Touch");
+        touchSensor.addOnStateChangedListener(touchState -> {
+            LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
+            if (touchState.getTouched()) {
+                LogUtils.d(TAG, "触摸了头部传感器");
+                if (fSay != null) {
+                    LogUtils.d(TAG, "停止讲话");
+                    fSay.requestCancellation();
+                } else {
+                    LogUtils.d(TAG, "sayFuture为null");
+                }
+            }
+        });
+        // 手部传感器
+        TouchSensor leftHandSensor = touch.getSensor("LHand/Touch");
+        TouchSensor rightHandSensor = touch.getSensor("RHand/Touch");
+        TouchSensor.OnStateChangedListener onStateChangedListenerHand = touchState -> {
+            LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
+            if (touchState.getTouched()) {
+                LogUtils.d(TAG, "触摸了手部传感器");
+                if (fSay != null) {
+                    LogUtils.d(TAG, "停止讲话");
+                    fSay.requestCancellation();
+                } else {
+                    LogUtils.d(TAG, "sayFuture为null");
+                }
+            }
+        };
+        leftHandSensor.addOnStateChangedListener(onStateChangedListenerHand);
+        rightHandSensor.addOnStateChangedListener(onStateChangedListenerHand);
+        // 底部传感器
+        TouchSensor bumperSensorBack = touch.getSensor("Bumper/Back");
+        TouchSensor bumperSensorLeft = touch.getSensor("Bumper/FrontLeft");
+        TouchSensor bumperSensorRight = touch.getSensor("Bumper/FrontRight");
+        TouchSensor.OnStateChangedListener onStateChangedListenerBumper = touchState -> {
+            LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
+            if (touchState.getTouched()) {
+                LogUtils.d(TAG, "触摸了底部传感器");
+                if (fSay != null) {
+                    LogUtils.d(TAG, "停止讲话");
+                    fSay.requestCancellation();
+                } else {
+                    LogUtils.d(TAG, "sayFuture为null");
+                }
+            }
+        };
+        bumperSensorBack.addOnStateChangedListener(onStateChangedListenerBumper);
+        bumperSensorLeft.addOnStateChangedListener(onStateChangedListenerBumper);
+        bumperSensorRight.addOnStateChangedListener(onStateChangedListenerBumper);
     }
 
     private void sendNlpMessage(AIUIAgent mAIUIAgent) {
@@ -138,10 +198,6 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         return answer;
     }
 
-    public Future<Void> getSayFuture() {
-        return fSay;
-    }
-
     private class MyAIUIListener implements AIUIListener {
         private String answer;
         private CountDownLatch countDownLatch;
@@ -162,6 +218,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         @Override
         public void onEvent(AIUIEvent event) {
             LogUtils.d(TAG, "on event: " + event.eventType);
+            LogUtils.d(TAG, "讯飞AIUI回复：" + event.info);
             switch (event.eventType) {
                 case AIUIConstant.EVENT_CONNECTED_TO_SERVER:
                     // 连接到服务器
@@ -197,24 +254,64 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                 }
                                 // 服务分类
                                 String service = result.getJSONObject("intent").getString("service");
+                                EventMsg msg = new EventMsg();
                                 switch (service) {
                                     case "app":
                                         // 操作APP
                                         String intent = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getString("intent");
                                         String appName = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("value");
-                                        if (intent.equals("LAUNCH")) {
-                                            // 打开APP
-                                            EventMsg msg = new EventMsg();
-                                            msg.setTag(Constants.LAUNCH);
-                                            msg.setMsg(appName);
-                                            EventBus.getDefault().post(msg);
-                                        } else if (intent.equals("EXIT")) {
-                                            // 关闭APP
-                                            EventMsg msg = new EventMsg();
-                                            msg.setTag(Constants.EXIT);
-                                            msg.setMsg(appName);
-                                            EventBus.getDefault().post(msg);
+                                        msg.setAction(Constants.APP);
+                                        msg.setIntent(intent);
+                                        msg.setText(appName);
+                                        msg.setShow(true);
+                                        EventBus.getDefault().post(msg);
+                                        break;
+                                    case "OS3993444234.action":
+                                        // 执行机器人动作
+                                        String action = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("normValue");
+                                        msg.setAction(Constants.ACTION);
+                                        msg.setText(action);
+                                        msg.setShow(true);
+                                        EventBus.getDefault().post(msg);
+                                        LogUtils.d(TAG, "讯飞AIUI回复动作：" + action);
+                                        break;
+                                    case "OS3993444234.move":
+                                        // 执行机器人移动、旋转
+                                        String intentMove = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getString("intent");
+                                        String direction = null, number = null;
+                                        switch (intentMove) {
+                                            case "move":
+                                                direction = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("normValue");
+                                                number = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(1).getString("normValue");
+                                                break;
+                                            case "rotate":
+                                                direction = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("normValue");
+                                                break;
+                                            default:
+                                                break;
                                         }
+                                        msg.setAction(Constants.MOVE);
+                                        msg.setIntent(intentMove);
+                                        HashMap<String, String> params = new HashMap<>(2);
+                                        params.put("direction", direction);
+                                        params.put("number", number);
+                                        msg.setParams(params);
+                                        msg.setShow(true);
+                                        EventBus.getDefault().post(msg);
+                                        break;
+                                    case "openQA":
+                                        // 自定义问答
+                                        String topicId = result.getJSONObject("intent").getJSONObject("answer").getString("topicID");
+                                        answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
+                                        SPHelper.save("NlpAnswer", answer);
+                                        msg.setAction(Constants.QA);
+                                        HashMap<String, String> paramsQA = new HashMap<>(2);
+                                        paramsQA.put("topicId", topicId);
+                                        msg.setParams(paramsQA);
+                                        msg.setText(answer);
+                                        msg.setShow(true);
+                                        EventBus.getDefault().post(msg);
+                                        LogUtils.d(TAG, "讯飞AIUI回复自定义问答：" + answer);
                                         break;
                                     default:
                                         answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
@@ -227,9 +324,9 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                                 .replaceAll("\\[]", "");
                                         SPHelper.save("NlpAnswer", answer);
                                         // 通过EventBus发送给UI界面更新对话列表
-                                        EventMsg msg = new EventMsg();
-                                        msg.setTag(Constants.REPLY);
-                                        msg.setMsg(answer);
+                                        msg.setAction(Constants.REPLY);
+                                        msg.setText(answer);
+                                        msg.setShow(true);
                                         EventBus.getDefault().post(msg);
                                         break;
                                 }

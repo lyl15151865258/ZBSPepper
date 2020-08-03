@@ -45,8 +45,6 @@ import org.greenrobot.eventbus.ThreadMode;
 public abstract class BaseActivity extends AppCompatActivity {
 
     public String TAG = getClass().getName();
-    private Toast toast;
-    private LoadingDialog loadingDialog;
     public int mWidth;
     public int mHeight;
     protected float mDensity;
@@ -54,6 +52,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected int mAvatarSize;
     protected float mRatio;
     protected Vibrator vibrator;
+    private Toast toast;
+    private LoadingDialog loadingDialog;
 
     @SuppressLint("WrongConstant")
     @Override
@@ -188,21 +188,21 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param msg 需要显示的文本
      */
     public void showToast(String msg) {
-            //如果授予了App系统通知权限，则使用系统Toast
-            View view = LayoutInflater.from(this).inflate(R.layout.toast_layout, findViewById(android.R.id.content), false);
-            TextView tvMessage = view.findViewById(R.id.mbMessage);
-            tvMessage.setText(msg);
-            if (toast == null) {
-                toast = new Toast(this);
-                toast.setView(view);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.setDuration(Toast.LENGTH_SHORT);
-            } else {
-                toast.setView(view);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.setDuration(Toast.LENGTH_SHORT);
-            }
-            toast.show();
+        //如果授予了App系统通知权限，则使用系统Toast
+        View view = LayoutInflater.from(this).inflate(R.layout.toast_layout, findViewById(android.R.id.content), false);
+        TextView tvMessage = view.findViewById(R.id.mbMessage);
+        tvMessage.setText(msg);
+        if (toast == null) {
+            toast = new Toast(this);
+            toast.setView(view);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
+            toast.setDuration(Toast.LENGTH_SHORT);
+        } else {
+            toast.setView(view);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
+            toast.setDuration(Toast.LENGTH_SHORT);
+        }
+        toast.show();
     }
 
     public void openActivity(Class<?> pClass) {
@@ -337,7 +337,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (this instanceof LogoActivity ) {
+            if (this instanceof LogoActivity) {
                 // RgbRecognizeActivity和IrRecognizeActivity页面不执行退出， 改返回键为Home键，返回手机主界面，不退出APP
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

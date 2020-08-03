@@ -10,15 +10,22 @@ package com.zhongbenshuo.zbspepper.constant;
 
 public class Constants {
 
-    /**
-     * EventBus标记
-     */
-    public static final String LISTEN = "LISTEN";
-    public static final String REPLY = "REPLY";
-    public static final String LAUNCH = "LAUNCH";
-    public static final String EXIT = "EXIT";
-
     // PPT图片展示时间
     public static final long PPT_SHOW_TIME = 10000;
+
+    // ************************************************************** EventBus标记 **************************************************************
+
+    // 听到的内容
+    public static final String LISTEN = "LISTEN";
+    // 回复的内容
+    public static final String REPLY = "REPLY";
+    // 操作App
+    public static final String APP = "APP";
+    // 执行机器人动作
+    public static final String ACTION = "ACTION";
+    // 执行机器人移动
+    public static final String MOVE = "MOVE";
+    // 自定义问答
+    public static final String QA = "QA";
 
 }

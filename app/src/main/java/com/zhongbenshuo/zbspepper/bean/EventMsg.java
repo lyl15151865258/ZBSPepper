@@ -1,5 +1,7 @@
 package com.zhongbenshuo.zbspepper.bean;
 
+import java.util.Map;
+
 /**
  * Created by LiYuliang on 2017/12/08.
  * 传递消息时使用，可以自己增加更多的参数
@@ -10,22 +12,58 @@ package com.zhongbenshuo.zbspepper.bean;
 
 public class EventMsg {
 
-    private String tag;
-    private String msg;
+    private String action;
+    private String service;
+    private String intent;
+    private String text;
+    private Map<String, String> params;
+    private boolean show;
 
-    public String getTag() {
-        return tag;
+    public String getAction() {
+        return action;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public void setAction(String action) {
+        this.action = action;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getService() {
+        return service;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public String getIntent() {
+        return intent;
+    }
+
+    public void setIntent(String intent) {
+        this.intent = intent;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
+    public boolean isShow() {
+        return show;
+    }
+
+    public void setShow(boolean show) {
+        this.show = show;
     }
 }

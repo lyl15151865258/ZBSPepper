@@ -118,15 +118,17 @@ public class ApplicationFragment extends BaseFragment {
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveMessage(EventMsg msg) {
-        switch (msg.getTag()) {
-            case Constants.LAUNCH:
+        switch (msg.getAction()) {
+            case Constants.APP:
                 // 打开应用
-                for (AppInfo appInfo : appList) {
-                    if (appInfo.getAppName().equalsIgnoreCase(msg.getMsg())) {
-                        PackageManager packageManager = mainActivity.getPackageManager();
-                        Intent intent = packageManager.getLaunchIntentForPackage(appInfo.getPackageName());
-                        startActivity(intent);
-                        break;
+                if (msg.getIntent().equals("LAUNCH")) {
+                    for (AppInfo appInfo : appList) {
+                        if (appInfo.getAppName().equalsIgnoreCase(msg.getText())) {
+                            PackageManager packageManager = mainActivity.getPackageManager();
+                            Intent intent = packageManager.getLaunchIntentForPackage(appInfo.getPackageName());
+                            startActivity(intent);
+                            break;
+                        }
                     }
                 }
                 break;

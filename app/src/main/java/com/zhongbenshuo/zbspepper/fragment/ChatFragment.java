@@ -2,6 +2,7 @@ package com.zhongbenshuo.zbspepper.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 /**
  * 聊天问答
@@ -83,14 +86,38 @@ public class ChatFragment extends BaseFragment {
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveMessage(EventMsg msg) {
-        switch (msg.getTag()) {
+        switch (msg.getAction()) {
             case Constants.LISTEN:
                 // 听到的内容
-                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.LISTEN, msg.getMsg()));
+                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.LISTEN, msg.getText()));
                 break;
             case Constants.REPLY:
                 // 听清的回复
-                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.REPLY_CLEAR, msg.getMsg()));
+                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.REPLY_CLEAR, msg.getText()));
+                break;
+            case Constants.QA:
+                // 自定义问答
+                Map<String, String> params = msg.getParams();
+                String topicId = params.get("topicId");
+                chatAdapter.insertData(new ChatText(TimeUtils.getCurrentTimeMillis(), ChatText.CHATTYPE.REPLY_CLEAR, msg.getText()));
+                if (!TextUtils.isEmpty(topicId)) {
+                    switch (topicId) {
+                        case "79993617082946208":
+                            // 公司简介
+                            mainActivity.moveToPosition(0);
+                            break;
+                        case "79994247423223502":
+                            // 经营范围
+                            mainActivity.moveToPosition(1);
+                            break;
+                        case "79994402879962156":
+                            // 工程案例
+                            mainActivity.moveToPosition(2);
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 break;
             default:
                 break;

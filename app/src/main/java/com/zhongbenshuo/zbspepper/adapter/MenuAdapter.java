@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +43,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     public MenuViewHolder onCreateViewHolder(@NotNull ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_menu, viewGroup, false);
         MenuViewHolder menuViewHolder = new MenuViewHolder(view);
+        menuViewHolder.menu = view.findViewById(R.id.menu);
         menuViewHolder.tvMenu = view.findViewById(R.id.tvMenu);
         menuViewHolder.ivMenu = view.findViewById(R.id.ivMenu);
         return menuViewHolder;
@@ -70,13 +72,18 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         return list.size();
     }
 
-    static class MenuViewHolder extends RecyclerView.ViewHolder {
+    public static class MenuViewHolder extends RecyclerView.ViewHolder {
 
+        private LinearLayout menu;
         private TextView tvMenu;
         private ImageView ivMenu;
 
         private MenuViewHolder(View itemView) {
             super(itemView);
+        }
+
+        public void clickItem() {
+            menu.performClick();
         }
     }
 
@@ -93,4 +100,5 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     public void setOnItemClickListener(OnItemClickListener listener) {
         mListener = listener;
     }
+
 }
