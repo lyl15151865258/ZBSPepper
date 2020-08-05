@@ -120,8 +120,8 @@ public class ApplicationFragment extends BaseFragment {
     public void receiveMessage(EventMsg msg) {
         switch (msg.getAction()) {
             case Constants.APP:
-                // 打开应用
-                if (msg.getIntent().equals("LAUNCH")) {
+                // 打开应用（打开相机不处理，由聊天页面处理）
+                if (msg.getIntent().equals("LAUNCH") && !msg.getText().equals("相机")) {
                     for (AppInfo appInfo : appList) {
                         if (appInfo.getAppName().equalsIgnoreCase(msg.getText())) {
                             PackageManager packageManager = mainActivity.getPackageManager();

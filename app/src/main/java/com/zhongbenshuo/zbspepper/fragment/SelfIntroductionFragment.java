@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.zhongbenshuo.zbspepper.R;
 import com.zhongbenshuo.zbspepper.activity.MainActivity;
@@ -17,7 +18,6 @@ import com.zhongbenshuo.zbspepper.network.ExceptionHandle;
 import com.zhongbenshuo.zbspepper.network.NetClient;
 import com.zhongbenshuo.zbspepper.network.NetworkObserver;
 import com.zhongbenshuo.zbspepper.utils.NetworkUtil;
-import com.zhongbenshuo.zbspepper.widget.textview.MixtureTextView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +38,7 @@ public class SelfIntroductionFragment extends BaseFragment {
 
     private Context mContext;
     private MainActivity mainActivity;
-    private MixtureTextView tvSelf;
+    private AppCompatTextView tvSelf;
 
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

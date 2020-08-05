@@ -3,11 +3,9 @@ package com.zhongbenshuo.zbspepper.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -48,7 +46,6 @@ public abstract class BaseFragment extends Fragment {
     private boolean isFirstInvisible = true;
 
     private Context mContext;
-    private Toast toast;
     private LoadingDialog loadingDialog;
 
     @Override
@@ -154,10 +151,6 @@ public abstract class BaseFragment extends Fragment {
         if (getUserVisibleHint()) {
             onUserInvisible();
         }
-        //如果toast在显示则取消显示
-        if (toast != null) {
-            toast.cancel();
-        }
         //取消显示dialog
         cancelDialog();
         LogUtils.d(LogUtils.TAG, getClass().getSimpleName() + "onPause() ");
@@ -220,26 +213,8 @@ public abstract class BaseFragment extends Fragment {
         showToast(getString(resId));
     }
 
-    /**
-     * 自定义的Toast，避免重复出现
-     *
-     * @param msg 弹出的信息
-     */
+
     public void showToast(String msg) {
-        //如果授予了App系统通知权限，则使用系统Toast
-        View view = LayoutInflater.from(mContext).inflate(R.layout.toast_layout, viewGroup);
-        TextView tvMessage = view.findViewById(R.id.mbMessage);
-        tvMessage.setText(msg);
-        if (toast == null) {
-            toast = new Toast(mContext);
-            toast.setView(view);
-            toast.setGravity(Gravity.BOTTOM, 0, 0);
-            toast.setDuration(Toast.LENGTH_SHORT);
-        } else {
-            toast.setView(view);
-            toast.setGravity(Gravity.BOTTOM, 0, 0);
-            toast.setDuration(Toast.LENGTH_SHORT);
-        }
-        toast.show();
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
     }
 }

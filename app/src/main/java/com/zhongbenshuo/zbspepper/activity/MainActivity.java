@@ -2,8 +2,11 @@ package com.zhongbenshuo.zbspepper.activity;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,6 +29,7 @@ import com.aldebaran.qi.sdk.builder.AnimateBuilder;
 import com.aldebaran.qi.sdk.builder.AnimationBuilder;
 import com.aldebaran.qi.sdk.builder.ChatBuilder;
 import com.aldebaran.qi.sdk.builder.GoToBuilder;
+import com.aldebaran.qi.sdk.builder.LookAtBuilder;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
 import com.aldebaran.qi.sdk.builder.TransformBuilder;
 import com.aldebaran.qi.sdk.object.actuation.Actuation;
@@ -34,6 +38,8 @@ import com.aldebaran.qi.sdk.object.actuation.Animation;
 import com.aldebaran.qi.sdk.object.actuation.Frame;
 import com.aldebaran.qi.sdk.object.actuation.FreeFrame;
 import com.aldebaran.qi.sdk.object.actuation.GoTo;
+import com.aldebaran.qi.sdk.object.actuation.LookAt;
+import com.aldebaran.qi.sdk.object.actuation.LookAtMovementPolicy;
 import com.aldebaran.qi.sdk.object.actuation.Mapping;
 import com.aldebaran.qi.sdk.object.conversation.Chat;
 import com.aldebaran.qi.sdk.object.conversation.Say;
@@ -76,6 +82,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,6 +127,7 @@ public class MainActivity extends BaseActivity {
     private static volatile long seconds = 0;
     private InputPasswordDialog inputDialog;
     private SyncTimeTask syncTimeTask;
+    private MediaPlayer mMediaPlayer;
 
     private MenuAdapter.OnItemClickListener onItemClickListener = (view, position) -> {
 //        if (position == menuList.size() - 1) {
@@ -265,60 +273,45 @@ public class MainActivity extends BaseActivity {
         }
     };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mContext = this;
-
-        constraintLayout = findViewById(R.id.layout);
-
-        rvMenu = findViewById(R.id.rvMenu);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        rvMenu.setLayoutManager(linearLayoutManager);
-
-        menuList = new ArrayList<>();
-        menuList.add(new Menu(R.drawable.company, getString(R.string.CompanyProfile), true));
-        menuList.add(new Menu(R.drawable.scope, getString(R.string.BusinessScope), false));
-        menuList.add(new Menu(R.drawable.cases, getString(R.string.EngineeringCase), false));
-        menuList.add(new Menu(R.drawable.self, getString(R.string.SelfIntroduction), false));
-        menuList.add(new Menu(R.drawable.conversation, getString(R.string.ChatPage), false));
-        menuList.add(new Menu(R.drawable.application, getString(R.string.MyApplication), false));
-        menuList.add(new Menu(R.drawable.setting, getString(R.string.Setting), false));
-        menuAdapter = new MenuAdapter(this, menuList);
-        menuAdapter.setOnItemClickListener(onItemClickListener);
-        rvMenu.setAdapter(menuAdapter);
-
-        viewPager = findViewById(R.id.viewpager);
-        // 不允许滑动ViewPager
-        viewPager.setUserInputEnabled(false);
-
-        List<Fragment> fragments = new ArrayList<>();
-        fragments.add(new CompanyProfileFragment());
-        fragments.add(new BusinessScopeFragment());
-        fragments.add(new EngineeringCaseFragment());
-        fragments.add(new SelfIntroductionFragment());
-        fragments.add(new ChatFragment());
-        fragments.add(new ApplicationFragment());
-        fragments.add(new SettingFragment());
-        FragmentAdapter fragmentAdapter = new FragmentAdapter(this, fragments);
-        viewPager.setAdapter(fragmentAdapter);
-        viewPager.setOffscreenPageLimit(menuList.size());
-
-        speechBarView = findViewById(R.id.speechBar);
-
-        banner = findViewById(R.id.banner);
-        llBatteryView = findViewById(R.id.llBattery);
-        llBatteryView.setVisibility(SPHelper.getBoolean("toggleShowBatteryView", false) ? View.VISIBLE : View.GONE);
-
-        QiSDK.register(this, robotLifecycleCallbacks);
-
-        syncTimeTask = new SyncTimeTask(this);
-        syncTimeTask.execute();
-
-        queryAskSentence();
-    }
+    // 音频焦点变化监听
+    private AudioManager.OnAudioFocusChangeListener focusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            switch (focusChange) {
+                case AudioManager.AUDIOFOCUS_LOSS:
+                    // 长时间失去
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.stop();
+                    }
+                    mMediaPlayer.release();
+                    mMediaPlayer = null;
+                    break;
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                    // 短时间失去
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.pause();
+                    }
+                    break;
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                    // 暂时失去 audio focus，但是允许持续播放音频(以很小的声音)，不需要完全停止播放。
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.setVolume(0.1f, 0.1f);
+                    }
+                    break;
+                case AudioManager.AUDIOFOCUS_GAIN:
+                    // 获得音频焦点
+                    if (mMediaPlayer == null) {
+                        mMediaPlayer = new MediaPlayer();
+                    } else if (!mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.start();
+                    }
+                    mMediaPlayer.setVolume(1.0f, 1.0f);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     /**
      * 获取询问语句
@@ -372,6 +365,97 @@ public class MainActivity extends BaseActivity {
                 .setDelayTime(5000);
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mContext = this;
+
+        constraintLayout = findViewById(R.id.layout);
+
+        rvMenu = findViewById(R.id.rvMenu);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        rvMenu.setLayoutManager(linearLayoutManager);
+
+        menuList = new ArrayList<>();
+        menuList.add(new Menu(R.drawable.company, getString(R.string.CompanyProfile), true));
+        menuList.add(new Menu(R.drawable.scope, getString(R.string.BusinessScope), false));
+        menuList.add(new Menu(R.drawable.cases, getString(R.string.EngineeringCase), false));
+        menuList.add(new Menu(R.drawable.self, getString(R.string.SelfIntroduction), false));
+        menuList.add(new Menu(R.drawable.conversation, getString(R.string.ChatPage), false));
+        menuList.add(new Menu(R.drawable.application, getString(R.string.MyApplication), false));
+        menuList.add(new Menu(R.drawable.setting, getString(R.string.Setting), false));
+        menuAdapter = new MenuAdapter(this, menuList);
+        menuAdapter.setOnItemClickListener(onItemClickListener);
+        rvMenu.setAdapter(menuAdapter);
+
+        viewPager = findViewById(R.id.viewpager);
+        // 不允许滑动ViewPager
+        viewPager.setUserInputEnabled(false);
+
+        List<Fragment> fragments = new ArrayList<>();
+        fragments.add(new CompanyProfileFragment());
+        fragments.add(new BusinessScopeFragment());
+        fragments.add(new EngineeringCaseFragment());
+        fragments.add(new SelfIntroductionFragment());
+        fragments.add(new ChatFragment());
+        fragments.add(new ApplicationFragment());
+        fragments.add(new SettingFragment());
+        FragmentAdapter fragmentAdapter = new FragmentAdapter(this, fragments);
+        viewPager.setAdapter(fragmentAdapter);
+        viewPager.setOffscreenPageLimit(menuList.size());
+
+        speechBarView = findViewById(R.id.speechBar);
+
+        banner = findViewById(R.id.banner);
+        llBatteryView = findViewById(R.id.llBattery);
+        llBatteryView.setVisibility(SPHelper.getBoolean("toggleShowBatteryView", false) ? View.VISIBLE : View.GONE);
+
+        QiSDK.register(this, robotLifecycleCallbacks);
+
+        syncTimeTask = new SyncTimeTask(this);
+        syncTimeTask.execute();
+
+        queryAskSentence();
+
+        // 申请音频焦点
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // 对于Android 8.0+
+            AudioFocusRequest audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                    .setOnAudioFocusChangeListener(focusChangeListener).build();
+            audioFocusRequest.acceptsDelayedFocusGain();
+            audioManager.requestAudioFocus(audioFocusRequest);
+        } else {
+            // 小于Android 8.0
+            int result = audioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                LogUtils.d(TAG, "获取到了音频焦点");
+            } else {
+                LogUtils.d(TAG, "无法获取音频焦点");
+            }
+        }
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+    }
+
+    @Override
+    protected void onResume() {
+        banner.start();
+        conversationStatusBinder.init(constraintLayout, speechBarView);
+        keyboardVisibilityWatcher.subscribe(this::hideSystemBars, this);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        banner.stop();
+        keyboardVisibilityWatcher.release();
+        conversationStatusBinder.unbind(true);
+        super.onPause();
+    }
+
     /**
      * 收到EventBus发来的消息并处理
      *
@@ -394,18 +478,6 @@ public class MainActivity extends BaseActivity {
                             break;
                         case "鞠躬":
                             // 鞠躬
-                            myAnimation = AnimationBuilder.with(mQiContext).withResources(R.raw.elephant_a001).buildAsync();
-                            break;
-                        case "向前看":
-                            // 向前看
-                            myAnimation = AnimationBuilder.with(mQiContext).withResources(R.raw.elephant_a001).buildAsync();
-                            break;
-                        case "向右看":
-                            // 向右看
-                            myAnimation = AnimationBuilder.with(mQiContext).withResources(R.raw.elephant_a001).buildAsync();
-                            break;
-                        case "向左看":
-                            // 向左看
                             myAnimation = AnimationBuilder.with(mQiContext).withResources(R.raw.elephant_a001).buildAsync();
                             break;
                         case "低头":
@@ -485,60 +557,157 @@ public class MainActivity extends BaseActivity {
                     LogUtils.d(TAG, "当前需要执行的移动为：" + msg.getText());
                     Actuation actuation = mQiContext.getActuation();
                     Frame robotFrame = actuation.robotFrame();
-                    // 定义一个沿 X 轴方向的 1 米的偏移量。
                     Transform transform = null;
                     Map<String, String> params = msg.getParams();
                     String direction = params.get("direction");
                     String number = params.get("number");
-                    if (!TextUtils.isEmpty(direction)) {
-                        switch (direction) {
-                            case "前":
-                                transform = TransformBuilder.create().fromXTranslation(TextUtils.isEmpty(number) ? 0 : Integer.parseInt(number));
-                                break;
-                            case "后":
-                                transform = TransformBuilder.create().fromXTranslation(TextUtils.isEmpty(number) ? 0 : -Integer.parseInt(number));
-                                break;
-                            case "左":
-                                transform = TransformBuilder.create().from2DTranslation(0, TextUtils.isEmpty(number) ? 0 : Integer.parseInt(number));
-                                break;
-                            case "右":
-                                transform = TransformBuilder.create().from2DTranslation(0, TextUtils.isEmpty(number) ? 0 : -Integer.parseInt(number));
-                                break;
-                            default:
-                                break;
-                        }
-                        if (transform != null) {
-                            Mapping mapping = mQiContext.getMapping();
-                            FreeFrame targetFrame = mapping.makeFreeFrame();
-                            // 0L 是指时间戳，可以指定时间来更新 FreeFrame。
-                            targetFrame.update(robotFrame, transform, 0L);
-                            GoTo goTo = GoToBuilder.with(mQiContext)
-                                    .withFrame(targetFrame.frame())
-                                    .build();
-                            goTo.addOnStartedListener(() -> LogUtils.d(TAG, "GoTo：机器人开始移动"));
+                    String rotateLook = params.get("rotateLook");
 
-                            Future<Void> goToFuture = goTo.async().run();
-                            goToFuture.thenConsume(future -> {
-                                if (future.isSuccess()) {
-                                    LogUtils.d(TAG, "GoTo：机器人移动成功");
-                                    msg.setAction(Constants.REPLY);
-                                    msg.setText("执行移动成功");
-                                    msg.setShow(true);
-                                    EventBus.getDefault().post(msg);
-                                } else if (future.isCancelled()) {
-                                    LogUtils.d(TAG, "GoTo：机器人移动被取消");
-                                    msg.setAction(Constants.REPLY);
-                                    msg.setText("执行移动取消");
-                                    msg.setShow(true);
-                                    EventBus.getDefault().post(msg);
-                                } else if (future.hasError()) {
-                                    LogUtils.d(TAG, "GoTo：机器人移动出错:" + future.getError().toString());
-                                    msg.setAction(Constants.REPLY);
-                                    msg.setText("执行移动出错:" + future.getError().getMessage());
-                                    msg.setShow(true);
-                                    EventBus.getDefault().post(msg);
+                    String intent = msg.getIntent();
+                    switch (intent) {
+                        case "move":
+                            // 移动
+                            if (direction != null && number != null) {
+                                switch (direction) {
+                                    case "前":
+                                        transform = TransformBuilder.create().fromXTranslation(Integer.parseInt(number));
+                                        break;
+                                    case "后":
+                                        transform = TransformBuilder.create().fromXTranslation(-Integer.parseInt(number));
+                                        break;
+                                    case "左":
+                                        transform = TransformBuilder.create().from2DTranslation(0, Integer.parseInt(number));
+                                        break;
+                                    case "右":
+                                        transform = TransformBuilder.create().from2DTranslation(0, -Integer.parseInt(number));
+                                        break;
+                                    default:
+                                        break;
                                 }
+                                if (transform != null) {
+                                    Mapping mapping = mQiContext.getMapping();
+                                    FreeFrame targetFrame = mapping.makeFreeFrame();
+                                    // 0L 是指时间戳，可以指定时间来更新 FreeFrame。
+                                    targetFrame.update(robotFrame, transform, 0L);
+                                    GoTo goTo = GoToBuilder.with(mQiContext)
+                                            .withFrame(targetFrame.frame())
+                                            .build();
+                                    goTo.addOnStartedListener(() -> LogUtils.d(TAG, "GoTo：机器人开始移动"));
+
+                                    Future<Void> goToFuture = goTo.async().run();
+                                    goToFuture.thenConsume(future -> {
+                                        if (future.isSuccess()) {
+                                            LogUtils.d(TAG, "GoTo：机器人移动成功");
+                                            msg.setAction(Constants.REPLY);
+                                            msg.setText("执行移动成功");
+                                            msg.setShow(true);
+                                            EventBus.getDefault().post(msg);
+                                        } else if (future.isCancelled()) {
+                                            LogUtils.d(TAG, "GoTo：机器人移动被取消");
+                                            msg.setAction(Constants.REPLY);
+                                            msg.setText("执行移动取消");
+                                            msg.setShow(true);
+                                            EventBus.getDefault().post(msg);
+                                        } else if (future.hasError()) {
+                                            LogUtils.d(TAG, "GoTo：机器人移动出错:" + future.getError().toString());
+                                            msg.setAction(Constants.REPLY);
+                                            msg.setText("执行移动出错:" + future.getError().getMessage());
+                                            msg.setShow(true);
+                                            EventBus.getDefault().post(msg);
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        case "rotate_look":
+                            // 旋转
+                            if (direction != null) {
+                                switch (direction) {
+                                    case "前":
+                                        transform = TransformBuilder.create().from2DTranslation(1, 0);
+                                        break;
+                                    case "后":
+                                        transform = TransformBuilder.create().from2DTranslation(-1, 0);
+                                        break;
+                                    case "左":
+                                        transform = TransformBuilder.create().from2DTranslation(0, 1);
+                                        break;
+                                    case "右":
+                                        transform = TransformBuilder.create().from2DTranslation(0, -1);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                if (transform != null) {
+                                    Mapping mapping = mQiContext.getMapping();
+                                    FreeFrame targetFrame = mapping.makeFreeFrame();
+                                    // 0L 是指时间戳，可以指定时间来更新 FreeFrame。
+                                    targetFrame.update(robotFrame, transform, 0L);
+                                    LookAt lookAt = LookAtBuilder.with(mQiContext)
+                                            .withFrame(targetFrame.frame())
+                                            .build();
+                                    // 设置底座一起旋转
+                                    if ("看".equals(rotateLook)) {
+                                        lookAt.setPolicy(LookAtMovementPolicy.HEAD_ONLY);
+                                        LogUtils.d(TAG, "LookAt：机器人LookAt——看");
+                                    } else if ("转".equals(rotateLook)) {
+                                        lookAt.setPolicy(LookAtMovementPolicy.HEAD_AND_BASE);
+                                        LogUtils.d(TAG, "LookAt：机器人LookAt——转");
+                                    }
+                                    lookAt.addOnStartedListener(() -> LogUtils.d(TAG, "LookAt：机器人开始LookAt"));
+
+                                    Future<Void> lookAtFuture = lookAt.async().run();
+                                    lookAtFuture.thenConsume(future -> {
+                                        if (future.isSuccess()) {
+                                            LogUtils.d(TAG, "LookAt：机器人LookAt成功");
+                                            msg.setAction(Constants.REPLY);
+                                            msg.setText("执行LookAt成功");
+                                            msg.setShow(true);
+                                            EventBus.getDefault().post(msg);
+                                        } else if (future.isCancelled()) {
+                                            LogUtils.d(TAG, "LookAt：机器人LookAt被取消");
+                                            msg.setAction(Constants.REPLY);
+                                            msg.setText("执行LookAt取消");
+                                            msg.setShow(true);
+                                            EventBus.getDefault().post(msg);
+                                        } else if (future.hasError()) {
+                                            LogUtils.d(TAG, "LookAt：机器人LookAt出错:" + future.getError().toString());
+                                            msg.setAction(Constants.REPLY);
+                                            msg.setText("执行LookAt出错:" + future.getError().getMessage());
+                                            msg.setShow(true);
+                                            EventBus.getDefault().post(msg);
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }).start();
+                break;
+            case Constants.ANIMAL_CRIES:
+                // 动物叫声
+                new Thread(() -> {
+                    Map<String, String> params = msg.getParams();
+                    String url = String.valueOf(params.get("url"));
+                    if (!TextUtils.isEmpty(url)) {
+                        try {
+                            LogUtils.d(TAG, "播放动物叫声：" + url);
+                            mMediaPlayer.reset();
+                            mMediaPlayer.setDataSource(url);
+                            mMediaPlayer.prepareAsync();
+                            mMediaPlayer.setOnPreparedListener(mediaPlayer -> mMediaPlayer.start());
+                            mMediaPlayer.setOnErrorListener((mediaPlayer, what, extra) -> {
+                                // 遇到错误就重置MediaPlayer
+                                LogUtils.d(TAG, "媒体文件获取异常，播放失败");
+                                mediaPlayer.stop();
+                                mediaPlayer.reset();
+                                return false;
                             });
+                        } catch (IOException e) {
+                            mMediaPlayer.release();
+                            e.printStackTrace();
                         }
                     }
                 }).start();
@@ -546,35 +715,6 @@ public class MainActivity extends BaseActivity {
             default:
                 break;
         }
-    }
-
-    @Override
-    protected void onResume() {
-        banner.start();
-        conversationStatusBinder.init(constraintLayout, speechBarView);
-        keyboardVisibilityWatcher.subscribe(this::hideSystemBars, this);
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        banner.stop();
-        keyboardVisibilityWatcher.release();
-        conversationStatusBinder.unbind(true);
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        flag = false;
-        if (syncTimeTask != null) {
-            syncTimeTask.cancel(true);
-            syncTimeTask = null;
-        }
-        banner.destroy();
-        QiSDK.unregister(this, robotLifecycleCallbacks);
-        conversationStatusBinder.unbind(true);
-        super.onDestroy();
     }
 
     @Override
@@ -682,6 +822,31 @@ public class MainActivity extends BaseActivity {
     // 显示或隐藏电池图标
     public void showBatteryView(boolean show) {
         llBatteryView.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.abandonAudioFocus(focusChangeListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        flag = false;
+        if (syncTimeTask != null) {
+            syncTimeTask.cancel(true);
+            syncTimeTask = null;
+        }
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+        banner.destroy();
+        QiSDK.unregister(this, robotLifecycleCallbacks);
+        conversationStatusBinder.unbind(true);
+        super.onDestroy();
     }
 
 }

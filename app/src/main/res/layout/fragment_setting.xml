@@ -71,4 +71,26 @@
         app:layout_constraintStart_toEndOf="@id/tv2"
         app:layout_constraintTop_toTopOf="@id/tv3" />
 
+    <TextView
+        android:id="@+id/tv5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:gravity="center"
+        android:text="触摸停止讲话"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_18"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toggleShowBatteryView" />
+
+    <ToggleButton
+        android:id="@+id/toggleTouchStopSay"
+        style="@style/toggle"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/dp_10"
+        app:layout_constraintBottom_toBottomOf="@+id/tv5"
+        app:layout_constraintStart_toEndOf="@id/tv2"
+        app:layout_constraintTop_toTopOf="@id/tv5" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

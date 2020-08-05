@@ -8,7 +8,8 @@ import android.widget.TextView;
 public class TextAnimationManager {
 
     private static final long SMALL_ANIMATION_DURATION = 120;
-    private static final long AUTO_HIDE_DELAY = 8_000;
+    // 自动隐藏文字的时间
+    private static final long AUTO_HIDE_DELAY = 2_000;
 
     private TextView speechTextView;
     private ViewPropertyAnimator textAnimation;

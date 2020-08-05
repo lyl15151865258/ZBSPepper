@@ -38,7 +38,7 @@ public class SettingFragment extends BaseFragment {
     private boolean abilitiesHeld;
     private Holder holder;
     private EnforceTabletReachability enforceTabletReachability;
-    private ToggleButton toggleAutonomousAbilities, toggleEnforceTabletReachability, toggleShowBatteryView;
+    private ToggleButton toggleAutonomousAbilities, toggleEnforceTabletReachability, toggleShowBatteryView, toggleTouchStopSay;
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -57,7 +57,15 @@ public class SettingFragment extends BaseFragment {
                 case R.id.toggleEnforceTabletReachability:
                     break;
                 case R.id.toggleShowBatteryView:
+                    // 显示电池图标
                     mainActivity.showBatteryView(toggleShowBatteryView.isChecked());
+                    SPHelper.save("toggleShowBatteryView", toggleShowBatteryView.isChecked());
+                    showToast("已" + (toggleShowBatteryView.isChecked() ? "显示" : "隐藏") + "电池图标");
+                    break;
+                case R.id.toggleTouchStopSay:
+                    // 触摸传感器停止讲话
+                    SPHelper.save("toggleTouchStopSay", toggleTouchStopSay.isChecked());
+                    showToast("已" + (toggleShowBatteryView.isChecked() ? "开启" : "关闭") + "触摸传感器停止讲话");
                     break;
                 default:
                     break;
@@ -74,17 +82,20 @@ public class SettingFragment extends BaseFragment {
         toggleAutonomousAbilities = view.findViewById(R.id.toggleAutonomousAbilities);
         toggleEnforceTabletReachability = view.findViewById(R.id.toggleEnforceTabletReachability);
         toggleShowBatteryView = view.findViewById(R.id.toggleShowBatteryView);
+        toggleTouchStopSay = view.findViewById(R.id.toggleTouchStopSay);
 
         // 设置ToggleButton默认显示
         abilitiesHeld = SPHelper.getBoolean("toggleAutonomousAbilities", false);
         toggleAutonomousAbilities.setChecked(!abilitiesHeld);
         toggleEnforceTabletReachability.setChecked(SPHelper.getBoolean("toggleEnforceTabletReachability", false));
         toggleShowBatteryView.setChecked(SPHelper.getBoolean("toggleShowBatteryView", false));
+        toggleTouchStopSay.setChecked(SPHelper.getBoolean("toggleTouchStopSay", false));
 
         // 添加监听
         toggleAutonomousAbilities.setOnClickListener(onClickListener);
         toggleEnforceTabletReachability.setOnClickListener(onClickListener);
         toggleShowBatteryView.setOnClickListener(onClickListener);
+        toggleTouchStopSay.setOnClickListener(onClickListener);
         return view;
     }
 

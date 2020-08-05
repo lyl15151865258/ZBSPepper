@@ -9,9 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +17,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,7 +49,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected int mAvatarSize;
     protected float mRatio;
     protected Vibrator vibrator;
-    private Toast toast;
     private LoadingDialog loadingDialog;
 
     @SuppressLint("WrongConstant")
@@ -150,10 +146,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this);
         }
-        //如果toast在显示则取消显示
-        if (toast != null) {
-            toast.cancel();
-        }
         //取消显示dialog
         cancelDialog();
         LogUtils.d(LogUtils.TAG, getClass().getSimpleName() + "onPause() ");
@@ -182,27 +174,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         showToast(getString(resId));
     }
 
-    /**
-     * 自定义的Toast，避免重复出现
-     *
-     * @param msg 需要显示的文本
-     */
     public void showToast(String msg) {
-        //如果授予了App系统通知权限，则使用系统Toast
-        View view = LayoutInflater.from(this).inflate(R.layout.toast_layout, findViewById(android.R.id.content), false);
-        TextView tvMessage = view.findViewById(R.id.mbMessage);
-        tvMessage.setText(msg);
-        if (toast == null) {
-            toast = new Toast(this);
-            toast.setView(view);
-            toast.setGravity(Gravity.BOTTOM, 0, 0);
-            toast.setDuration(Toast.LENGTH_SHORT);
-        } else {
-            toast.setView(view);
-            toast.setGravity(Gravity.BOTTOM, 0, 0);
-            toast.setDuration(Toast.LENGTH_SHORT);
-        }
-        toast.show();
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     public void openActivity(Class<?> pClass) {

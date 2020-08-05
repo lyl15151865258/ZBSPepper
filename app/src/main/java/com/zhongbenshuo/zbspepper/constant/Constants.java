@@ -1,11 +1,11 @@
 package com.zhongbenshuo.zbspepper.constant;
 
 /**
- * 部分常量值，用于解决提示魔法值的提示和接口返回数据解析用
- * Created by LiYuliang on 2017/10/25.
+ * 部分常量值
+ * Created by LiYuliang on 2019/10/25.
  *
  * @author LiYuliang
- * @version 2017/11/21
+ * @version 2019/11/21
  */
 
 public class Constants {
@@ -27,5 +27,7 @@ public class Constants {
     public static final String MOVE = "MOVE";
     // 自定义问答
     public static final String QA = "QA";
+    // 动物叫声
+    public static final String ANIMAL_CRIES = "ANIMAL_CRIES";
 
 }

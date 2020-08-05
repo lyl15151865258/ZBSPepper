@@ -1,5 +1,7 @@
 package com.zhongbenshuo.zbspepper.bean;
 
+import com.zhongbenshuo.zbspepper.interfaces.MessageType;
+
 /**
  * 聊天文本实体类
  * Created at 2020/1/7 0007 23:32
@@ -8,10 +10,15 @@ package com.zhongbenshuo.zbspepper.bean;
  * @version : 2020/1/7 0007 23:32
  */
 
-public class ChatText {
+public class ChatText implements MessageType {
+
+    @Override
+    public int getType() {
+        return MessageType.TEXT;
+    }
 
     // 聊天类型
-    public enum CHATTYPE {
+    public enum TEXTTYPE {
         REPLY_CLEAR,
         REPLY_BLURRY,
         LISTEN
@@ -21,12 +28,12 @@ public class ChatText {
     private long time;
 
     // 聊天内容类型
-    private CHATTYPE chatType;
+    private TEXTTYPE chatType;
 
     // 聊天内容文本
     private String chatContent;
 
-    public ChatText(long time, CHATTYPE chatType, String chatContent) {
+    public ChatText(long time, TEXTTYPE chatType, String chatContent) {
         this.time = time;
         this.chatType = chatType;
         this.chatContent = chatContent;
@@ -40,11 +47,11 @@ public class ChatText {
         this.time = time;
     }
 
-    public CHATTYPE getChatType() {
+    public TEXTTYPE getChatType() {
         return chatType;
     }
 
-    public void setChatType(CHATTYPE chatType) {
+    public void setChatType(TEXTTYPE chatType) {
         this.chatType = chatType;
     }
 

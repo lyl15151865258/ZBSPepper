@@ -113,7 +113,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         TouchSensor touchSensor = touch.getSensor("Head/Touch");
         touchSensor.addOnStateChangedListener(touchState -> {
             LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
-            if (touchState.getTouched()) {
+            if (touchState.getTouched() && SPHelper.getBoolean("toggleTouchStopSay", false)) {
                 LogUtils.d(TAG, "触摸了头部传感器");
                 if (fSay != null) {
                     LogUtils.d(TAG, "停止讲话");
@@ -128,7 +128,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         TouchSensor rightHandSensor = touch.getSensor("RHand/Touch");
         TouchSensor.OnStateChangedListener onStateChangedListenerHand = touchState -> {
             LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
-            if (touchState.getTouched()) {
+            if (touchState.getTouched() && SPHelper.getBoolean("toggleTouchStopSay", false)) {
                 LogUtils.d(TAG, "触摸了手部传感器");
                 if (fSay != null) {
                     LogUtils.d(TAG, "停止讲话");
@@ -146,7 +146,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
         TouchSensor bumperSensorRight = touch.getSensor("Bumper/FrontRight");
         TouchSensor.OnStateChangedListener onStateChangedListenerBumper = touchState -> {
             LogUtils.d(TAG, "Sensor " + (touchState.getTouched() ? "touched" : "released") + " at " + touchState.getTime());
-            if (touchState.getTouched()) {
+            if (touchState.getTouched() && SPHelper.getBoolean("toggleTouchStopSay", false)) {
                 LogUtils.d(TAG, "触摸了底部传感器");
                 if (fSay != null) {
                     LogUtils.d(TAG, "停止讲话");
@@ -278,14 +278,15 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                     case "OS3993444234.move":
                                         // 执行机器人移动、旋转
                                         String intentMove = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getString("intent");
-                                        String direction = null, number = null;
+                                        String direction = null, number = null, rotateLook = null;
                                         switch (intentMove) {
                                             case "move":
                                                 direction = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("normValue");
                                                 number = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(1).getString("normValue");
                                                 break;
-                                            case "rotate":
+                                            case "rotate_look":
                                                 direction = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(0).getString("normValue");
+                                                rotateLook = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getJSONArray("slots").getJSONObject(1).getString("normValue");
                                                 break;
                                             default:
                                                 break;
@@ -295,6 +296,7 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                         HashMap<String, String> params = new HashMap<>(2);
                                         params.put("direction", direction);
                                         params.put("number", number);
+                                        params.put("rotateLook", rotateLook);
                                         msg.setParams(params);
                                         msg.setShow(true);
                                         EventBus.getDefault().post(msg);
@@ -312,6 +314,20 @@ public class IFlytekNlpReaction extends BaseChatbotReaction {
                                         msg.setShow(true);
                                         EventBus.getDefault().post(msg);
                                         LogUtils.d(TAG, "讯飞AIUI回复自定义问答：" + answer);
+                                        break;
+                                    case "animalCries":
+                                        // 动物叫声
+                                        String intentAnimalCries = result.getJSONObject("intent").getJSONArray("semantic").getJSONObject(0).getString("intent");
+                                        String url = result.getJSONObject("intent").getJSONObject("data").getJSONArray("result").getJSONObject(0).getString("url");
+                                        answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
+                                        msg.setAction(Constants.ANIMAL_CRIES);
+                                        msg.setIntent(intentAnimalCries);
+                                        msg.setText(answer);
+                                        HashMap<String, String> paramsAnimalCries = new HashMap<>(2);
+                                        paramsAnimalCries.put("url", url);
+                                        msg.setParams(paramsAnimalCries);
+                                        msg.setShow(false);
+                                        EventBus.getDefault().post(msg);
                                         break;
                                     default:
                                         answer = result.getJSONObject("intent").getJSONObject("answer").getString("text");
