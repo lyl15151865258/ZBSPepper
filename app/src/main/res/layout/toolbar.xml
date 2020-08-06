@@ -44,7 +44,6 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:textColor="@color/white"
-        android:text="中本硕机电欢迎您"
         android:textSize="@dimen/sp_28" />
 
     <FrameLayout
